@@ -12,7 +12,7 @@ public class LoginService
 
     public LoginService()
     {
-        _emailSender = Environment.GetEnvironmentVariable("Email");
+        _emailSender = Environment.GetEnvironmentVariable("EmailSender");
         _emailSenderName = Environment.GetEnvironmentVariable("EmailSenderName");
         _emailSenderAppPassword = Environment.GetEnvironmentVariable("EmailSenderAppPassword");
     }

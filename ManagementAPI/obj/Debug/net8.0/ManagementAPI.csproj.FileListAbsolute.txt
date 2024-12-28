@@ -58,3 +58,4 @@ C:\Users\IgorL\Desktop\Programação\Bussines-Proj\ManagementAPI\ManagementAPI\b
 C:\Users\IgorL\Desktop\Programação\Bussines-Proj\ManagementAPI\ManagementAPI\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\IgorL\Desktop\Programação\Bussines-Proj\ManagementAPI\ManagementAPI\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\IgorL\Desktop\Programação\Bussines-Proj\ManagementAPI\ManagementAPI\bin\Debug\net8.0\dotenv.net.dll
+C:\Users\IgorL\Desktop\Programação\Bussines-Proj\ManagementAPI\ManagementAPI\obj\Debug\net8.0\ManagementAPI.sourcelink.json

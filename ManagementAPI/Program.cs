@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using DbContext = ManagementAPI.Context.DbContext;
 using dotenv.net;
+using ManagementAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
@@ -19,6 +20,8 @@ builder.Services.AddDbContext<DbContext>(options =>
         ServerVersion.AutoDetect(connectionString)
     );
 });
+
+builder.Services.AddScoped<LoginService>();
 
 builder.Services.AddCors(options =>
 {
