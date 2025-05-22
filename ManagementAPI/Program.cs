@@ -2,14 +2,26 @@ using Microsoft.EntityFrameworkCore;
 using DbContext = ManagementAPI.Context.DbContext;
 using dotenv.net;
 using ManagementAPI.Services;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
 
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
-// Add services to the container.
-builder.Services.AddControllers();
+/* Build controllers and add custom filters */
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>(); 
+    options.Filters.Add<ExceptionFilter>();   
+});
+
+/* Setup to allowed custom filters */
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+   options.SuppressModelStateInvalidFilter = true; 
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
