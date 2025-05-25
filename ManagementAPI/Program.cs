@@ -5,6 +5,7 @@ using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using ManagementAPI.SwaggerMocks;
+using ManagementAPI.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
@@ -17,6 +18,12 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ValidationFilter>();
     options.Filters.Add<ExceptionFilter>();
 });
+
+
+builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();
+builder.Services.AddScoped<MailerService>();
 
 /* Setup to allowed custom filters */
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -40,8 +47,6 @@ builder.Services.AddDbContext<DbContext>(options =>
     );
 });
 
-builder.Services.AddScoped<LoginService>();
-builder.Services.AddScoped<MailerService>();
 
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<MailerRequestDtoExample>();

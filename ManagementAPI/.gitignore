@@ -2,32 +2,63 @@
 bin/
 obj/
 
-## User-specific files
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
 *.user
 *.suo
-*.userosscache
-*.sln.docstates
 
-## Logs
+# Logs
 *.log
 
-## OS files
-.DS_Store
-Thumbs.db
+# Configs locais
+appsettings.Development.json
+.env
+.env.*
 
-## Rider
-.idea/
-
-## Visual Studio Code
-.vscode/
-
-## NuGet
+# Pacotes
 *.nupkg
 *.snupkg
-.nuget/
+packages/
+*.cache
+*.tmp
 
-## Others
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Test Results
+TestResult*/ 
+*.trx
+
+# NuGet
+project.lock.json
+project.fragment.lock.json
+*.nupkg
+
+# dotCover
+.idea/.dotCover
+
+# Windows
+ehthumbs.db
+Desktop.ini
+
+# Rider / JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Secrets
+secrets.json
+
+# Outros
+*.sqlite
 *.db
 
 ## Ignore arquivos de configuração de ambiente 
-.env
+*.bak
+*.swp

@@ -1,16 +1,11 @@
-using System.Text.Json;
 using ManagementAPI.Context;
 using ManagementAPI.DTO;
 using ManagementAPI.Services;
 using ManagementAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using BCrypt.Net;
-using System.Net;
-using System.Xml;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Newtonsoft.Json;
-using JsonException = System.Text.Json.JsonException;
 
 namespace ManagementAPI.Controller;
 
@@ -30,9 +25,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Register")]
-    public IActionResult Register([FromBody] SignUp signUp)
+    public IActionResult Register([FromBody] DefaultUser signUp)
     {
-
         if (signUp == null)
         {
             return BadRequest(new { Message = "Invalid sign-up data." });
@@ -50,33 +44,20 @@ public class AuthController : ControllerBase
             return Conflict(new { Message = "Email is already in use.", Code = 2 });
         }
 
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(signUp.Password);
-
-        var newUser = new UserTable
-        {
-            Username = signUp.Username,
-            Password = hashedPassword,
-            Email = signUp.Email
-        };
-
-        _dbContext.User.Add(newUser);
-        _dbContext.SaveChanges();
-
         return Ok(new { Message = "User registered successfully" });
-
     }
 
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] SignUp signUp)
+    public IActionResult Login([FromBody] DefaultUser User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == signUp.Email);
+        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == User.Email);
 
         if (loginUser == null)
         {
             return Unauthorized(new { Message = "Invalid username or password." });
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(signUp.Password, loginUser.Password))
+        if (!BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
         {
             return Unauthorized(new { Message = "Invalid username or password." });
         }
@@ -153,7 +134,6 @@ public class AuthController : ControllerBase
             User.PasswordRecovery = jsonPasswordRecoveryObj;
 
             _dbContext.SaveChanges();
-
         }
 
 
@@ -179,7 +159,8 @@ public class AuthController : ControllerBase
     [HttpPost("VerifyCode")]
     public IActionResult VerifyRecoveryCode([FromBody] RequestRecover requestRecover)
     {
-
+        //Fa�am uma service pra isso!
+        //Controller n�o lida com l�gica!!! <3
         if (requestRecover.code == null)
         {
             return Unauthorized(new { Message = "Invalid code." });
