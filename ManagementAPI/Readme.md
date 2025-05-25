@@ -55,11 +55,12 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para 
 
 Exemplo de .env:
 ```
-CONNECTION_STRING=server=localhost;database=management_cs_api;user=root;password=2004;    
+DB_CONNECTION_STRING=server=localhost;database=management_cs_api;user=root;password=2004;    
 JWT_ISSUER=http://localhost:5215/
 JWT_AUDIENCE=http://localhost:5215/
 JWT_SECRET=IZAqg5Mg2Jv0o09XJAoO1QbiQUHhFl9wlaWibYvePxVS7VZwazsaR4yBYTgA893K
-JWT_VALIDITY_MINUTES=30
-    
-    
+JWT_EXPIRE=30
+EMAIL_SENDER=teste@gmail.com
+EMAIL_SENDER_NAME=teste
+EMAIL_SENDER_APP_PASSWORD=mySecurePass
 ```

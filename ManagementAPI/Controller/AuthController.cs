@@ -24,6 +24,7 @@ public class AuthController : ControllerBase
         _loginService = loginService;
     }
 
+
     [HttpPost("Register")]
     public IActionResult Register([FromBody] DefaultUser signUp)
     {
