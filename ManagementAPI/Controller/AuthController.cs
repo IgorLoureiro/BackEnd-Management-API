@@ -49,9 +49,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] DefaultUser User)
+    public IActionResult Login([FromBody] LoginRequest User)
     {
-        var token = _loginService.ValidateLogin(signUp);
+        var token = _loginService.ValidateLogin(User);
 
         if (token == "")
         {

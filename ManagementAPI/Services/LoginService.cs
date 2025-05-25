@@ -27,13 +27,13 @@ public class LoginService
         _jwtService = jwtService;
     }
 
-    public string ValidateLogin(SignUp signUp)
+    public string ValidateLogin(LoginRequest User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == signUp.Email);
+        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == User.Email);
 
-        Console.WriteLine(signUp.Password);
+        Console.WriteLine(User.Password);
 
-        if (BCrypt.Net.BCrypt.Verify(signUp.Password, loginUser.Password))
+        if (BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
         {
             var claims = new List<Claim>
             {

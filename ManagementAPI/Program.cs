@@ -3,6 +3,7 @@ using DbContext = ManagementAPI.Context.DbContext;
 using dotenv.net;
 using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using ManagementAPI.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
@@ -37,6 +38,7 @@ builder.Services.AddDbContext<DbContext>(options =>
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();
 
 builder.Services.AddCors(options =>
 {
