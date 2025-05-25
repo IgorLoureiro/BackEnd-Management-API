@@ -4,6 +4,7 @@ namespace ManagementAPI.DTO;
 
 public class MailerRequestDto
 {
+
     [Required(ErrorMessage = "O campo 'Sender' é obrigatório.")]
     [MinLength(1, ErrorMessage = "O campo 'Sender' deve conter pelo menos 1 caractere")]
     public string? Sender { get; set; }

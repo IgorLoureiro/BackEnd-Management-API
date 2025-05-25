@@ -4,7 +4,7 @@ using MailKit.Security;
 
 namespace ManagementAPI.Services;
 
-public class MailerService 
+public class MailerService
 {
     private readonly string senderName = "System OTP";
 
@@ -22,13 +22,35 @@ public class MailerService
     {
         return senderEmailAddress;
     }
-    
+
     public string GetSenderEmailPassword()
     {
         return senderEmailPassword;
     }
 
-    public void SenderMail(string recipientName, string recipientAddress, string recipientSubject, string recipientMessage) 
+    public async Task SendOtpEmail(string email, string otpCode)
+    {
+        string recipientName = "Random Recipient";
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(senderName, senderEmailAddress));
+        message.To.Add(new MailboxAddress(recipientName, email));
+        message.Subject = "Código de Acesso - Sharp Guard";
+
+        message.Body = new TextPart("plain")
+        {
+            Text = $"Seu código de verificação é: {otpCode}"
+        };
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync("sandbox.smtp.mailtrap.io", 587, SecureSocketOptions.StartTls); // sandbox.smtp.mailtrap.io
+        await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
+        await client.SendAsync(message);
+        await client.DisconnectAsync(true);
+    }
+
+
+    public async Task SenderMail(string recipientName, string recipientAddress, string recipientSubject, string recipientMessage)
     {
         var message = new MimeMessage();
 
@@ -38,17 +60,17 @@ public class MailerService
 
         message.Body = new TextPart("plain")
         {
-            Text =  recipientMessage
+            Text = recipientMessage
         };
-        
+
         using (var client = new SmtpClient())
         {
             try
             {
-                client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                client.Authenticate(senderEmailAddress, senderEmailPassword);
-                client.Send(message);
-                client.Disconnect(true);
+                await client.ConnectAsync("sandbox.smtp.mailtrap.io", 587, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
                 Console.WriteLine("Email enviado com sucesso!");
             }
             catch (Exception ex)
@@ -56,6 +78,6 @@ public class MailerService
                 Console.WriteLine($"Erro ao enviar e-mail: {ex.Message}");
             }
         }
-        
+
     }
 }

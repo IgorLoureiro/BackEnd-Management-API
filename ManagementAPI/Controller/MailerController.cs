@@ -22,19 +22,19 @@ public class MailerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-    public IActionResult SendEmail([FromBody] MailerRequestDto request)
+    public async Task<IActionResult> SendEmail([FromBody] MailerRequestDto request)
     {
-        try 
+        try
         {
             string senderName = request.Sender!;
             string senderAddress = request.To!;
             string senderSubject = request.Subject!;
             string senderMessage = request.Body!;
 
-            _mailerService.SenderMail(senderName, senderAddress, senderSubject, senderMessage);
+            await _mailerService.SenderMail(senderName, senderAddress, senderSubject, senderMessage);
             return Ok("Email enviado com sucesso!");
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             return StatusCode(500, $"Erro ao enviar e-mail: {ex.Message}");
         }

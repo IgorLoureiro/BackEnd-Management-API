@@ -24,6 +24,17 @@ public class SignUp
     public string Username { get; set; } = string.Empty;
 }
 
+
+public class SignUpOtpRequestDto
+{
+    [Required]
+    [EmailAddress]
+    [StringLength(100, MinimumLength = 1)]
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = string.Empty;
+}
+
+
 public class RecoverPassword
 {
     public int? Attempts { get; set; } = 0;

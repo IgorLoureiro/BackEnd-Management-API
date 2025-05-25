@@ -3,6 +3,8 @@ using DbContext = ManagementAPI.Context.DbContext;
 using dotenv.net;
 using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
+using ManagementAPI.SwaggerMocks;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
@@ -12,19 +14,23 @@ var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 /* Build controllers and add custom filters */
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<ValidationFilter>(); 
-    options.Filters.Add<ExceptionFilter>();   
+    options.Filters.Add<ValidationFilter>();
+    options.Filters.Add<ExceptionFilter>();
 });
 
 /* Setup to allowed custom filters */
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-   options.SuppressModelStateInvalidFilter = true; 
+    options.SuppressModelStateInvalidFilter = true;
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations();
+    options.ExampleFilters();
+});
 
 builder.Services.AddDbContext<DbContext>(options =>
 {
@@ -37,6 +43,9 @@ builder.Services.AddDbContext<DbContext>(options =>
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<MailerService>();
 
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<MailerRequestDtoExample>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -47,14 +56,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseCors("AllowSpecificOrigin");
-app.UseHttpsRedirection();
-
+// app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
