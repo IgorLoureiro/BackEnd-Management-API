@@ -1,7 +1,3 @@
-# Ignore arquivos de configuração de ambiente 
-.env
-
-
 ## Build output
 bin/
 obj/
@@ -32,3 +28,6 @@ Thumbs.db
 
 ## Others
 *.db
+
+## Ignore arquivos de configuração de ambiente 
+.env
