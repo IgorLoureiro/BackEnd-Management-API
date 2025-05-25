@@ -27,7 +27,6 @@ public class AuthController : ControllerBase
     [HttpPost("Register")]
     public IActionResult Register([FromBody] DefaultUser signUp)
     {
-
         if (signUp == null)
         {
             return BadRequest(new { Message = "Invalid sign-up data." });

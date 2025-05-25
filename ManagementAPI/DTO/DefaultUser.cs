@@ -5,7 +5,6 @@ namespace ManagementAPI.DTO
 {
     public class DefaultUser
     {
-        [Range(1, int.MaxValue)]
         [JsonPropertyName("id")]
         public int Id { get; set; } = 0;
 

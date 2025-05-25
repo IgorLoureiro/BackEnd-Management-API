@@ -1,5 +1,6 @@
 ﻿using ManagementAPI.DTO;
-using ManagementAPI.Models;
+using ManagementAPI.Helpers;
+using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementAPI.Controller
@@ -8,28 +9,41 @@ namespace ManagementAPI.Controller
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        [HttpPost]
-        public IActionResult CreateUser(DefaultUser User)
-        {
-            //var hashedPassword = BCrypt.Net.BCrypt.HashPassword(User.Password);
-
-            //var newUser = new UserTable
-            //{
-            //    Username = User.Username,
-            //    Password = hashedPassword,
-            //    Email = User.Email
-            //};
-
-            //_dbContext.User.Add(newUser);
-            //_dbContext.SaveChanges();
-
-            return Created();
+        private readonly IUserService _userService;
+        public UserController(IUserService userService) 
+        { 
+            _userService = userService;
         }
 
         [HttpPost]
-        public IActionResult User(DefaultUser User)
+        public async Task<IActionResult> CreateUser([FromBody] DefaultUser User)
         {
-            return Created();
+           var result = await _userService.CreateUserAsync(User);
+          return result.ToActionResult();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUser(int id)
+        {
+            var result = await _userService.GetUserByIdAsync(id);
+            if(result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] DefaultUser user)
+        {
+            var updatedUser = await _userService.UpdateUserAsync(id, user);
+            if (updatedUser == null) return NotFound();
+            return Ok(updatedUser);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var deletedUser = await _userService.DeleteUserByIdAsync(id);
+            if (deletedUser == null) return NotFound();
+            return Ok(deletedUser);
         }
     }
 }

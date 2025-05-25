@@ -3,6 +3,7 @@ using DbContext = ManagementAPI.Context.DbContext;
 using dotenv.net;
 using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using ManagementAPI.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
@@ -15,6 +16,10 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ValidationFilter>(); 
     options.Filters.Add<ExceptionFilter>();   
 });
+
+builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();
 
 /* Setup to allowed custom filters */
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -32,9 +37,6 @@ builder.Services.AddDbContext<DbContext>(options =>
         ServerVersion.AutoDetect(connectionString)
     );
 });
-
-builder.Services.AddScoped<LoginService>();
-builder.Services.AddScoped<UserService>();
 
 builder.Services.AddCors(options =>
 {
