@@ -1,22 +1,56 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using ManagementAPI.Context;
+using ManagementAPI.DTO;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace ManagementAPI.Services;
 
 public class LoginService
 {
 
-    private readonly string _emailSender;
-    private readonly string _emailSenderName;
+    private readonly string? _emailSender;
+    private readonly string? _emailSenderName;
     private readonly string? _emailSenderAppPassword;
+    private readonly DbContext _dbContext;
+    private readonly IJwtService _jwtService;
 
-    public LoginService()
+    public LoginService(DbContext dbContext, IJwtService jwtService)
     {
-        _emailSender = Environment.GetEnvironmentVariable("EmailSender");
-        _emailSenderName = Environment.GetEnvironmentVariable("EmailSenderName");
-        _emailSenderAppPassword = Environment.GetEnvironmentVariable("EmailSenderAppPassword");
+        _emailSender = Environment.GetEnvironmentVariable("EMAIL_SENDER");
+        _emailSenderName = Environment.GetEnvironmentVariable("EMAIL_SENDER_NAME");
+        _emailSenderAppPassword = Environment.GetEnvironmentVariable("EMAIL_SENDER_APP_PASSWORD");
+        _dbContext = dbContext;
+        _jwtService = jwtService;
     }
-    
+
+    public string ValidateLogin(SignUp signUp)
+    {
+        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == signUp.Email);
+
+        Console.WriteLine(signUp.Password);
+
+        if (BCrypt.Net.BCrypt.Verify(signUp.Password, loginUser.Password))
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, loginUser.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, loginUser.Email),
+                new Claim(JwtRegisteredClaimNames.Name, loginUser.Username),
+            };
+
+            // Gerar token JWT
+            var token = _jwtService.GerarToken(claims);
+
+            // Retornar token e dados necessários
+            return token;
+        }
+        return "";
+    }
+
     public static string GenerateRecoverPasswordCode()
     {
         byte[] bytes = new byte[4];
@@ -26,17 +60,17 @@ public class LoginService
         return Math.Abs(numero).ToString("D6");
     }
 
-    public string GetEmailSender()
+    public string? GetEmailSender()
     {
         return _emailSender;
     }
     
-    public string GetEmailSenderName()
+    public string? GetEmailSenderName()
     {
         return _emailSenderName;
     }
     
-    public string GetEmailSenderAppPassword()
+    public string? GetEmailSenderAppPassword()
     {
         return _emailSenderAppPassword;
     }

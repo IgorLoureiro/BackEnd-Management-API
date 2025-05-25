@@ -25,6 +25,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AddDbContext<DbContext>(options =>
 {
     options.UseMySql(
@@ -34,6 +35,7 @@ builder.Services.AddDbContext<DbContext>(options =>
 });
 
 builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddCors(options =>
 {

@@ -1,16 +1,11 @@
-using System.Text.Json;
 using ManagementAPI.Context;
 using ManagementAPI.DTO;
 using ManagementAPI.Services;
 using ManagementAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using BCrypt.Net;
-using System.Net;
-using System.Xml;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Newtonsoft.Json;
-using JsonException = System.Text.Json.JsonException;
 
 namespace ManagementAPI.Controller;
 
@@ -69,19 +64,14 @@ public class AuthController : ControllerBase
     [HttpPost("Login")]
     public IActionResult Login([FromBody] SignUp signUp)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == signUp.Email);
-        
-        if (loginUser == null)
+        var token = _loginService.ValidateLogin(signUp);
+
+        if (token == "")
         {
             return Unauthorized(new { Message = "Invalid username or password." });
         }
-        
-        if (!BCrypt.Net.BCrypt.Verify(signUp.Password, loginUser.Password))
-        {
-            return Unauthorized(new { Message = "Invalid username or password." });
-        }
-        
-        return Ok(new { Message = "User logged in successfully.", loginUser });
+
+        return Ok(new { Message = "User logged in successfully.", token});
     }
 
     [HttpPost("SendRecoverAccount")]
