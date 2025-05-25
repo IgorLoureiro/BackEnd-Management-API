@@ -34,6 +34,7 @@ builder.Services.AddDbContext<DbContext>(options =>
 });
 
 builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddCors(options =>
 {
