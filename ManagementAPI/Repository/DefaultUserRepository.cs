@@ -38,9 +38,7 @@ namespace ManagementAPI.Repository
         public async Task<UserTable?> DeleteUser(UserTable userTable)
         {
             _dbContext.User.Remove(userTable);
-
             await _dbContext.SaveChangesAsync();
-
             return userTable;
         }
 

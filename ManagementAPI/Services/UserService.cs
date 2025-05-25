@@ -1,4 +1,5 @@
 ﻿using ManagementAPI.DTO;
+using ManagementAPI.Helpers;
 using ManagementAPI.Models;
 using ManagementAPI.Repository;
 
@@ -14,7 +15,7 @@ namespace ManagementAPI.Services
         CreationFailed,
     }
 
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IDefaultUserRepository _defaultUserRepository;
         public UserService(IDefaultUserRepository defaultUserRepository)
@@ -53,11 +54,11 @@ namespace ManagementAPI.Services
             return UserServiceResult.Success;
         }
 
-        public async Task<DefaultUser?> UpdateUserAsync(DefaultUser defaultUser)
+        public async Task<DefaultUser?> UpdateUserAsync(int id, DefaultUser defaultUser)
         {
             if (defaultUser == null) return null;
 
-            var userFromTable = await _defaultUserRepository.GetUserByIdAsync(defaultUser.Id);
+            var userFromTable = await _defaultUserRepository.GetUserByIdAsync(id);
             if (userFromTable == null) return null;
 
             var updatedUserTable = MapFieldsToChange(userFromTable, defaultUser);
@@ -85,7 +86,7 @@ namespace ManagementAPI.Services
             {
                 Username = defaultUser.Username,
                 Email = defaultUser.Email,
-                Password = defaultUser.Password,
+                Password = PasswordEncryptionHelper.HashPassword(defaultUser.Password),
             };
         }
 
@@ -139,9 +140,9 @@ namespace ManagementAPI.Services
 
             if (!string.IsNullOrWhiteSpace(defaultUser.Password) &&
                 defaultUser.Password.Length >= 6 &&
-                defaultUser.Password != userTable.Password)
+                !PasswordEncryptionHelper.VerifyPassword(defaultUser.Password, userTable.Password))
             {
-                userTable.Password = defaultUser.Password;
+                userTable.Password = PasswordEncryptionHelper.HashPassword(defaultUser.Password);
             }
 
             return userTable;
