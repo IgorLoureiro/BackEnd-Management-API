@@ -28,7 +28,8 @@ namespace ManagementAPI.Services
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var bearerToken = "Bearer " + new JwtSecurityTokenHandler().WriteToken(token);
+            return bearerToken;
         }
     }
 
