@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using DbContext = ManagementAPI.Context.DbContext;
 using dotenv.net;
 using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;

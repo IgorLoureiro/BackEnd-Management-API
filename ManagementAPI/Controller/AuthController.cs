@@ -1,7 +1,6 @@
 using ManagementAPI.Context;
 using ManagementAPI.DTO;
 using ManagementAPI.Services;
-using ManagementAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using MailKit.Net.Smtp;
 using MimeKit;
@@ -26,9 +25,8 @@ public class AuthController : ControllerBase
 
 
     [HttpPost("Register")]
-    public IActionResult Register([FromBody] DefaultUser signUp)
+    public IActionResult Register([FromBody] DefaultUserResponse signUp)
     {
-
         if (signUp == null)
         {
             return BadRequest(new { Message = "Invalid sign-up data." });
@@ -50,7 +48,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] LoginRequest User)
+    public IActionResult Login([FromBody] DefaultUserResponse User)
     {
         var token = _loginService.ValidateLogin(User);
 

@@ -10,5 +10,6 @@ namespace ManagementAPI.Repository
         Task<UserTable?> CreateUserAsync(UserTable userTable);
         Task<UserTable?> DeleteUser(UserTable userTable);
         Task<UserTable?> UpdateUser(UserTable userTable);
+        Task<List<UserTable>> GetUserListAsync(int usersPerPage, int page);
     }
 }

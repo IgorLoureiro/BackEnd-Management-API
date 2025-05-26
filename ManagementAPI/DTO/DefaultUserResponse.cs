@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ManagementAPI.DTO
 {
-    public class DefaultUser
+    public class DefaultUserResponse
     {
         [JsonPropertyName("id")]
         public int Id { get; set; } = 0;

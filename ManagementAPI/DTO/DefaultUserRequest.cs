@@ -3,11 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace ManagementAPI.DTO
 {
-    public class DefaultUser
+    public class DefaultUserRequest
     {
-        [JsonPropertyName("id")]
-        public int Id { get; set; } = 0;
-
         [Required]
         [EmailAddress]
         [StringLength(100, MinimumLength = 6)]
