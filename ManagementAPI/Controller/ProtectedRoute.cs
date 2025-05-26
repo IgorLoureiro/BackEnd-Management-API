@@ -10,7 +10,7 @@ namespace ManagementAPI.Controller
     public class TestController : ControllerBase
     {
         [HttpGet("protected")]
-        [Authorize] // Só acessa com token válido
+        [Authorize]
         public IActionResult ProtectedRoute()
         {
             return Ok(new { message = "Você está autenticado!" });

@@ -54,7 +54,7 @@ public class AuthController : ControllerBase
     {
         var token = _loginService.ValidateLogin(User);
 
-        if (token == "")
+        if (string.IsNullOrEmpty(token)) 
         {
             return Unauthorized(new { Message = "Invalid username or password." });
         }

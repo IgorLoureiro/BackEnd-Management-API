@@ -27,11 +27,9 @@ public class LoginService
         _jwtService = jwtService;
     }
 
-    public string ValidateLogin(LoginRequest User)
+    public string? ValidateLogin(LoginRequest User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == User.Email);
-
-        Console.WriteLine(User.Password);
+        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email.Equals(User.Email));
 
         if (BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
         {
@@ -48,7 +46,7 @@ public class LoginService
             // Retornar token e dados necessários
             return token;
         }
-        return "";
+        return null;
     }
 
     public static string GenerateRecoverPasswordCode()
