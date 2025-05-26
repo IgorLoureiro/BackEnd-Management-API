@@ -23,16 +23,30 @@ namespace ManagementAPI.Services
             _defaultUserRepository = defaultUserRepository;
         }
 
-        public async Task<DefaultUser?> GetUserByIdAsync(int id)
+        public async Task<DefaultUserResponse?> GetUserByIdAsync(int id)
         {
             var userTable = await _defaultUserRepository.GetUserByIdAsync(id);
-
             if (userTable == null) return null;
-
             return GenerateDefaultUserFromUserTable(userTable);
         }
 
-        public async Task<UserServiceResult> CreateUserAsync(DefaultUser defaultUser)
+        public async Task<List<DefaultUserResponse>> GetListUserAsync(int usersPerPage, int page)
+        {
+            if (usersPerPage <= 0 || page <= 0)
+                return new List<DefaultUserResponse>();
+
+            usersPerPage = Math.Min(usersPerPage, 30);
+
+            var usersTableList = await _defaultUserRepository.GetUserListAsync(usersPerPage, page);
+            return usersTableList.Select(u => new DefaultUserResponse
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email
+            }).ToList();
+        }
+
+        public async Task<UserServiceResult> CreateUserAsync(DefaultUserResponse defaultUser)
         {
             if (!ValidateDefaultUser(defaultUser, true))
                 return UserServiceResult.InvalidUser;
@@ -54,7 +68,7 @@ namespace ManagementAPI.Services
             return UserServiceResult.Success;
         }
 
-        public async Task<DefaultUser?> UpdateUserAsync(int id, DefaultUser defaultUser)
+        public async Task<DefaultUserResponse?> UpdateUserAsync(int id, DefaultUserRequest defaultUser)
         {
             if (defaultUser == null) return null;
 
@@ -69,7 +83,7 @@ namespace ManagementAPI.Services
             return GenerateDefaultUserFromUserTable(userTableUpdated);
         }
 
-        public async Task<DefaultUser?> DeleteUserByIdAsync(int id)
+        public async Task<DefaultUserResponse?> DeleteUserByIdAsync(int id)
         {
             var userTable = await _defaultUserRepository.GetUserByIdAsync(id);
             if (userTable == null) return null;
@@ -80,7 +94,7 @@ namespace ManagementAPI.Services
             return GenerateDefaultUserFromUserTable(userTable);
         }
 
-        private UserTable GenerateUserTableFromDefaultUser(DefaultUser defaultUser)
+        private UserTable GenerateUserTableFromDefaultUser(DefaultUserResponse defaultUser)
         {
             return new UserTable
             {
@@ -90,9 +104,9 @@ namespace ManagementAPI.Services
             };
         }
 
-        private DefaultUser GenerateDefaultUserFromUserTable(UserTable userTable, bool generateWithPassword = false)
+        private DefaultUserResponse GenerateDefaultUserFromUserTable(UserTable userTable, bool generateWithPassword = false)
         {
-            var defaultUser = new DefaultUser
+            var defaultUser = new DefaultUserResponse
             {
                 Id = userTable.Id,
                 Username = userTable.Username,
@@ -105,7 +119,7 @@ namespace ManagementAPI.Services
             return defaultUser;
         }
 
-        private bool ValidateDefaultUser(DefaultUser defaultUser, bool validateWithPassword = false)
+        private bool ValidateDefaultUser(DefaultUserResponse defaultUser, bool validateWithPassword = false)
         {
             if (validateWithPassword)
             {
@@ -122,7 +136,7 @@ namespace ManagementAPI.Services
             return true;
         }
 
-        private UserTable MapFieldsToChange(UserTable userTable, DefaultUser defaultUser)
+        private UserTable MapFieldsToChange(UserTable userTable, DefaultUserRequest defaultUser)
         {
             if (!string.IsNullOrWhiteSpace(defaultUser.Username) &&
                     defaultUser.Username.Length >= 6 &&
