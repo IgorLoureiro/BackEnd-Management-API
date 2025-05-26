@@ -1,4 +1,5 @@
-﻿using ManagementAPI.Models;
+﻿using ManagementAPI.Context;
+using ManagementAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using DbContext = ManagementAPI.Context.DbContext;
 
@@ -26,6 +27,15 @@ namespace ManagementAPI.Repository
         public async Task<UserTable?> GetUserByEmailAsync(string email)
         {
             return await _dbContext.User.FirstOrDefaultAsync(ut => ut.Email.Equals(email));
+        }
+
+        public async Task<List<UserTable>> GetUserListAsync(int usersPerPage, int page)
+        {
+            return await _dbContext.User
+                .OrderBy(u => u.Id) 
+                .Skip((page - 1) * usersPerPage)
+                .Take(usersPerPage)
+                .ToListAsync();
         }
 
         public async Task<UserTable?> CreateUserAsync(UserTable userTable)
