@@ -1,4 +1,4 @@
-# Build
+## Build output
 bin/
 obj/
 
@@ -58,5 +58,7 @@ secrets.json
 # Outros
 *.sqlite
 *.db
+
+## Ignore arquivos de configuração de ambiente 
 *.bak
 *.swp

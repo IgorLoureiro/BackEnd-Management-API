@@ -1,10 +1,12 @@
 using ManagementAPI.Context;
 using ManagementAPI.DTO;
+using ManagementAPI.DTO.AuthController;
 using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Newtonsoft.Json;
+using ManagementAPI.Helpers;
 
 namespace ManagementAPI.Controller;
 
@@ -13,7 +15,6 @@ namespace ManagementAPI.Controller;
 
 public class AuthController : ControllerBase
 {
-
     private readonly LoginService _loginService;
     private readonly DbContext _dbContext;
 
@@ -47,21 +48,57 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] DefaultUserResponse User)
+    public IActionResult Login([FromBody] LoginRequest User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == User.Email);
+        var token = _loginService.ValidateLogin(User);
 
-        if (loginUser == null)
+        if (token == null)
         {
             return Unauthorized(new { Message = "Invalid username or password." });
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
+        return Ok(new { Message = "User logged in successfully.", token });
+    }
+
+    /* endpoint de login via OTP */
+    [HttpPost("login-otp")]
+    [ProducesResponseType(typeof(LoginOtpResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<LoginOtpResponseDto>> LoginOtp([FromBody] LoginOtpRequestDto User)
+    {
+        var loginOtpResponse = await _loginService.ValidateLoginByOtp(User);
+
+        if (loginOtpResponse == null)
         {
-            return Unauthorized(new { Message = "Invalid username or password." });
+            return Unauthorized(ErrorResponseMappingHelper.Create(401, "Login", "Invalid username or password."));
         }
 
-        return Ok(new { Message = "User logged in successfully.", loginUser });
+        if (string.IsNullOrEmpty(loginOtpResponse.token))
+        {
+            return Unauthorized(ErrorResponseMappingHelper.Create(401, "Token", "Token cannot be empty."));
+        }
+
+        return Ok(loginOtpResponse);
+    }
+
+    [HttpPost("send-otp")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> SendOtp([FromBody] SendOtpRequestDto request)
+    {
+        try
+        {
+            string senderAddress = request.Email!;
+
+            await _loginService.SendOtp(senderAddress);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erro ao enviar e-mail: {ex.Message}");
+        }
     }
 
     [HttpPost("SendRecoverAccount")]
@@ -137,8 +174,8 @@ public class AuthController : ControllerBase
     [HttpPost("VerifyCode")]
     public IActionResult VerifyRecoveryCode([FromBody] RequestRecover requestRecover)
     {
-        //Façam uma service pra isso!
-        //Controller não lida com lógica!!! <3
+        //Faï¿½am uma service pra isso!
+        //Controller nï¿½o lida com lï¿½gica!!! <3
         if (requestRecover.code == null)
         {
             return Unauthorized(new { Message = "Invalid code." });

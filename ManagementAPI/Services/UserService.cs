@@ -101,6 +101,7 @@ namespace ManagementAPI.Services
                 Username = defaultUser.Username,
                 Email = defaultUser.Email,
                 Password = PasswordEncryptionHelper.HashPassword(defaultUser.Password),
+                Role = defaultUser.Role,
             };
         }
 
