@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
+namespace ManagementAPI.Interceptors;
+
 public class ExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
@@ -13,7 +15,7 @@ public class ExceptionFilter : IExceptionFilter
         {
             StatusCode = 500
         };
-        
+
         Console.WriteLine($"Exception caught: {context.Exception.Message}");
     }
 }

@@ -1,20 +1,11 @@
 ﻿using ManagementAPI.DTO;
 using ManagementAPI.Helpers;
 using ManagementAPI.Models;
-using ManagementAPI.Repository;
+using ManagementAPI.Enums;
+using ManagementAPI.Interfaces;
 
 namespace ManagementAPI.Services
 {
-    public enum UserServiceResult
-    {
-        Success,
-        InvalidUser,
-        UsernameAlreadyExists,
-        EmailAlreadyExists,
-        GenerationFailed,
-        CreationFailed,
-    }
-
     public class UserService : IUserService
     {
         private readonly IDefaultUserRepository _defaultUserRepository;
@@ -30,14 +21,9 @@ namespace ManagementAPI.Services
             return GenerateDefaultUserFromUserTable(userTable);
         }
 
-        public async Task<List<DefaultUserResponse>> GetListUserAsync(int usersPerPage, int page)
+        public async Task<List<DefaultUserResponse>> GetListUserAsync(int limit, int page)
         {
-            if (usersPerPage <= 0 || page <= 0)
-                return new List<DefaultUserResponse>();
-
-            usersPerPage = Math.Min(usersPerPage, 30);
-
-            var usersTableList = await _defaultUserRepository.GetUserListAsync(usersPerPage, page);
+            var usersTableList = await _defaultUserRepository.GetUserListAsync(limit, page);
             return usersTableList.Select(u => new DefaultUserResponse
             {
                 Id = u.Id,

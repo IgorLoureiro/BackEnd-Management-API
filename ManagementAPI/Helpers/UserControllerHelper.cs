@@ -1,5 +1,5 @@
-﻿using ManagementAPI.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using ManagementAPI.Enums;
 
 namespace ManagementAPI.Helpers
 {

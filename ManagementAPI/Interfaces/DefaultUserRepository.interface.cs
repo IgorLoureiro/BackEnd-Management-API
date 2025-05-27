@@ -1,6 +1,6 @@
 ﻿using ManagementAPI.Models;
 
-namespace ManagementAPI.Repository
+namespace ManagementAPI.Interfaces
 {
     public interface IDefaultUserRepository
     {
@@ -10,6 +10,6 @@ namespace ManagementAPI.Repository
         Task<UserTable?> CreateUserAsync(UserTable userTable);
         Task<UserTable?> DeleteUser(UserTable userTable);
         Task<UserTable?> UpdateUser(UserTable userTable);
-        Task<List<UserTable>> GetUserListAsync(int usersPerPage, int page);
+        Task<List<UserTable>> GetUserListAsync(int limit, int page);
     }
 }

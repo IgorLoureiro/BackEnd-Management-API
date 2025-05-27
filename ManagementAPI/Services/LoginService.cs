@@ -1,35 +1,28 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using ManagementAPI.Context;
 using ManagementAPI.DTO;
 using ManagementAPI.DTO.AuthController;
-using ManagementAPI.Repository;
 using ManagementAPI.Interfaces;
-
+using ManagementAPI.Helpers;
 
 namespace ManagementAPI.Services;
 
-public class LoginService
+public class LoginService : ILoginService
 {
     private readonly string _emailSender;
     private readonly string _emailSenderName;
     private readonly string _emailSenderAppPassword;
-
-    private readonly DbContext _dbContext;
-
-    private readonly IDefaultUserRepository _userRepository;
-
     private readonly IJwtService _jwtService;
+    private readonly IDefaultUserRepository _userRepository;
     private readonly IMailerService _mailerService;
 
-    public LoginService(IDefaultUserRepository userRepository, DbContext dbContext, IJwtService jwtService, IMailerService mailerService)
+    public LoginService(IDefaultUserRepository userRepository, IJwtService jwtService, IMailerService mailerService)
     {
         _emailSender = Environment.GetEnvironmentVariable("EmailSender")!;
         _emailSenderName = Environment.GetEnvironmentVariable("EmailSenderName")!;
         _emailSenderAppPassword = Environment.GetEnvironmentVariable("EmailSenderAppPassword")!;
         _userRepository = userRepository;
-        _dbContext = dbContext;
         _jwtService = jwtService;
         _mailerService = mailerService;
     }
@@ -48,28 +41,27 @@ public class LoginService
         return _emailSenderAppPassword;
     }
 
-    public string? ValidateLogin(LoginRequest User)
+    public async Task<string?> ValidateLoginAsync(LoginRequest User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == User.Email);
+        var loginUser = await _userRepository.GetUserByEmailAsync(User.Email);
         if (loginUser == null) return null;
 
-        if (BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
-        {
-            var claims = new List<Claim>
+        /* validate password */
+        var isValidPassword = PasswordEncryptionHelper.VerifyPassword(User.Password, loginUser.Password);
+        if (!isValidPassword) return null;
+
+        /* Generate JWT Token */
+        var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, loginUser.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, loginUser.Email),
                 new Claim(JwtRegisteredClaimNames.Name, loginUser.Username),
+                new Claim(ClaimTypes.Role, loginUser.Role),
             };
 
-            // Gerar token JWT
-            var token = _jwtService.GerarToken(claims);
-
-            // Retornar token e dados necessários
-            return token;
-        }
-
-        return null;
+        /* return token */
+        var token = _jwtService.GenerateToken(claims);
+        return token;
     }
 
     public async Task<LoginOtpResponseDto?> ValidateLoginByOtp(LoginOtpRequestDto User)
@@ -79,10 +71,10 @@ public class LoginService
         if (loginUser == null) return null;
 
         /* Validate OTP Expiration */
-        if (!loginUser.OtpExpiration.HasValue || loginUser.OtpExpiration.Value < DateTime.UtcNow) return null;
+        if (loginUser.OtpCode == null || !loginUser.OtpExpiration.HasValue || loginUser.OtpExpiration.Value < DateTime.UtcNow) return null;
 
         /* Validate Otp code */
-        var isValidPassword = BCrypt.Net.BCrypt.Verify(User.Password, loginUser.OtpCode);
+        var isValidPassword = PasswordEncryptionHelper.VerifyPassword(User.Password, loginUser.OtpCode);
         if (!isValidPassword) return null;
 
         /* Generate JWT Token */
@@ -91,9 +83,10 @@ public class LoginService
                 new Claim(JwtRegisteredClaimNames.Sub, loginUser.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, loginUser.Email),
                 new Claim(JwtRegisteredClaimNames.Name, loginUser.Username),
+                new Claim(ClaimTypes.Role, loginUser.Role),
             };
 
-        var token = _jwtService.GerarToken(claims);
+        var token = _jwtService.GenerateToken(claims);
 
         return new LoginOtpResponseDto { token = token };
     }
@@ -124,7 +117,7 @@ public class LoginService
         await _mailerService.SenderMail(recipientName, recipientAddress, recipientSubject, recipientMessage);
     }
 
-    public static string GenerateOtpCode(int length = 4)
+    public string GenerateOtpCode(int length = 4)
     {
         var random = new Random();
         return new string(Enumerable.Range(0, length)
@@ -132,7 +125,7 @@ public class LoginService
             .ToArray());
     }
 
-    public static string GenerateRecoverPasswordCode()
+    public string GenerateRecoverPasswordCode()
     {
         byte[] bytes = new byte[4];
         RandomNumberGenerator.Fill(bytes);

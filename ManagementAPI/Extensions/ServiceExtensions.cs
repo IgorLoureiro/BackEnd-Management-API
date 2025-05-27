@@ -6,6 +6,7 @@ using DbContext = ManagementAPI.Context.DbContext;
 using ManagementAPI.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
 using ManagementAPI.Interfaces;
+using ManagementAPI.Interceptors;
 using System.Text.Json.Serialization;
 
 namespace ManagementAPI
@@ -33,7 +34,7 @@ namespace ManagementAPI
 
         public static IServiceCollection AddCustomServices(this IServiceCollection services)
         {
-            services.AddScoped<LoginService>();
+            services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();

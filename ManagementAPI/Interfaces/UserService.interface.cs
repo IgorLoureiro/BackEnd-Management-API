@@ -1,6 +1,7 @@
 ﻿using ManagementAPI.DTO;
+using ManagementAPI.Enums;
 
-namespace ManagementAPI.Services
+namespace ManagementAPI.Interfaces
 {
     public interface IUserService
     {
@@ -8,6 +9,6 @@ namespace ManagementAPI.Services
         Task<UserServiceResult> CreateUserAsync(DefaultUserResponse defaultUser);
         Task<DefaultUserResponse?> UpdateUserAsync(int id, DefaultUserRequest defaultUser);
         Task<DefaultUserResponse?> DeleteUserByIdAsync(int id);
-        Task<List<DefaultUserResponse>> GetListUserAsync(int usersPerPage, int page);
+        Task<List<DefaultUserResponse>> GetListUserAsync(int limit, int page);
     }
 }

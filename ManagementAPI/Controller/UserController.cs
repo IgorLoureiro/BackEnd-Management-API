@@ -1,6 +1,6 @@
 ﻿using ManagementAPI.DTO;
 using ManagementAPI.Helpers;
-using ManagementAPI.Services;
+using ManagementAPI.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementAPI.Controller
@@ -10,30 +10,30 @@ namespace ManagementAPI.Controller
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService) 
-        { 
+        public UserController(IUserService userService)
+        {
             _userService = userService;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] DefaultUserResponse User)
         {
-           var result = await _userService.CreateUserAsync(User);
-          return result.ToActionResult();
+            var result = await _userService.CreateUserAsync(User);
+            return result.ToActionResult();
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
             var result = await _userService.GetUserByIdAsync(id);
-            if(result == null) return NotFound();
+            if (result == null) return NotFound();
             return Ok(result);
         }
 
-        [HttpGet("UserList")]
-        public async Task<IActionResult> GetUsersList(int usersPerPage, int page)
+        [HttpGet()]
+        public async Task<IActionResult> GetUsersList(int limit = 10, int page = 1)
         {
-            var result = await _userService.GetListUserAsync(usersPerPage, page);
+            var result = await _userService.GetListUserAsync(limit, page);
             return Ok(result);
         }
 
