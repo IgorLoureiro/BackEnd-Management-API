@@ -1,7 +1,7 @@
 using Swashbuckle.AspNetCore.Filters;
 using ManagementAPI.DTO;
 
-namespace ManagementAPI.SwaggerMocks;
+namespace ManagementAPI.SwaggerExamples;
 
 public class MailerRequestDtoExample : IExamplesProvider<MailerRequestDto>
 {

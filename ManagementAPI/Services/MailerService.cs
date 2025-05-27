@@ -1,10 +1,11 @@
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using ManagementAPI.Interfaces;
 
 namespace ManagementAPI.Services;
 
-public class MailerService
+public class MailerService : IMailerService
 {
     private readonly string senderName = "System OTP";
 
