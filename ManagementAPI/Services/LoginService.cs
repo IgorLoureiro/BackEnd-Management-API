@@ -1,37 +1,37 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using ManagementAPI.Context;
 using ManagementAPI.DTO;
-using Microsoft.AspNetCore.Mvc;
+using ManagementAPI.Helpers;
+using ManagementAPI.Repository;
 
 
 namespace ManagementAPI.Services;
 
-public class LoginService
+public class LoginService : ILoginService
 {
 
     private readonly string? _emailSender;
     private readonly string? _emailSenderName;
     private readonly string? _emailSenderAppPassword;
-    private readonly DbContext _dbContext;
     private readonly IJwtService _jwtService;
+    private readonly IDefaultUserRepository _userRepository;
 
-    public LoginService(DbContext dbContext, IJwtService jwtService)
+    public LoginService(IJwtService jwtService, IDefaultUserRepository defaultUserRepository)
     {
         _emailSender = Environment.GetEnvironmentVariable("EMAIL_SENDER");
         _emailSenderName = Environment.GetEnvironmentVariable("EMAIL_SENDER_NAME");
         _emailSenderAppPassword = Environment.GetEnvironmentVariable("EMAIL_SENDER_APP_PASSWORD");
-        _dbContext = dbContext;
+        _userRepository = defaultUserRepository;
         _jwtService = jwtService;
     }
 
-    public string? ValidateLogin(LoginRequest User)
+    public async Task<string> ValidateLoginAsync(LoginRequest User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email.Equals(User.Email));
+        var loginUser = await _userRepository.GetUserByEmailAsync(User.Email);
 
-        if (BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
+        if (PasswordEncryptionHelper.VerifyPassword(User.Password, loginUser.Password))
         {
             var claims = new List<Claim>
             {
@@ -46,7 +46,7 @@ public class LoginService
             // Retornar token e dados necessários
             return token;
         }
-        return null;
+        return "";
     }
 
     public static string GenerateRecoverPasswordCode()

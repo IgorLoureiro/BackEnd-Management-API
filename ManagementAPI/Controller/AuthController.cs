@@ -14,10 +14,10 @@ namespace ManagementAPI.Controller;
 public class AuthController : ControllerBase
 {
 
-    private readonly LoginService _loginService;
+    private readonly ILoginService _loginService;
     private readonly DbContext _dbContext;
 
-    public AuthController(DbContext dbContext, LoginService loginService) : base()
+    public AuthController(DbContext dbContext, ILoginService loginService) : base()
     {
         _dbContext = dbContext;
         _loginService = loginService;
@@ -48,9 +48,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] DefaultUserResponse User)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest User)
     {
-        var token = _loginService.ValidateLogin(User);
+        var token = await _loginService.ValidateLoginAsync(User);
 
         if (string.IsNullOrEmpty(token)) 
         {
