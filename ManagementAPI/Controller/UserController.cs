@@ -16,7 +16,7 @@ namespace ManagementAPI.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] DefaultUser User)
+        public async Task<IActionResult> CreateUser([FromBody] DefaultUserResponse User)
         {
            var result = await _userService.CreateUserAsync(User);
           return result.ToActionResult();
@@ -30,8 +30,15 @@ namespace ManagementAPI.Controller
             return Ok(result);
         }
 
+        [HttpGet("UserList")]
+        public async Task<IActionResult> GetUsersList(int usersPerPage, int page)
+        {
+            var result = await _userService.GetListUserAsync(usersPerPage, page);
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] DefaultUser user)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] DefaultUserRequest user)
         {
             var updatedUser = await _userService.UpdateUserAsync(id, user);
             if (updatedUser == null) return NotFound();

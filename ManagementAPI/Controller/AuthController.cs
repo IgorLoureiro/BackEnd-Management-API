@@ -25,7 +25,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Register")]
-    public IActionResult Register([FromBody] DefaultUser signUp)
+    public IActionResult Register([FromBody] DefaultUserResponse signUp)
     {
         if (signUp == null)
         {
@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
     {
         var token = _loginService.ValidateLogin(User);
 
-        if (token == "")
+        if (token == null)
         {
             return Unauthorized(new { Message = "Invalid username or password." });
         }
