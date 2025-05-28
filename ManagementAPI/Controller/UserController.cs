@@ -1,11 +1,13 @@
 ﻿using ManagementAPI.DTO;
 using ManagementAPI.Helpers;
 using ManagementAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementAPI.Controller
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class UserController : ControllerBase
     {

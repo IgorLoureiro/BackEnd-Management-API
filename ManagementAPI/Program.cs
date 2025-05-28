@@ -10,7 +10,8 @@ builder.Services
     .AddCustomServices()
     .AddCustomDatabase()
     .AddCustomCors()
-    .AddSwagger();
+    .AddSwagger()
+    .AddJwt();
 
 var app = builder.Build();
 
@@ -22,5 +23,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowSpecificOrigin");
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
