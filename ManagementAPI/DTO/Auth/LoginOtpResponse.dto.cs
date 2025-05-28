@@ -1,4 +1,4 @@
-namespace ManagementAPI.DTO.AuthController;
+namespace ManagementAPI.DTO;
 
 public class LoginOtpResponseDto
 {

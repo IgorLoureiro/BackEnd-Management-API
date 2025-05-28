@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
+namespace ManagementAPI.Interceptors;
+
 public class ValidationFilter : IActionFilter
 {
     public void OnActionExecuting(ActionExecutingContext context)

@@ -6,6 +6,7 @@ using DbContext = ManagementAPI.Context.DbContext;
 using ManagementAPI.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
 using ManagementAPI.Interfaces;
+using ManagementAPI.Interceptors;
 using System.Text.Json.Serialization;
 
 namespace ManagementAPI
@@ -17,6 +18,7 @@ namespace ManagementAPI
             services.AddControllers(options =>
             {
                 options.Filters.Add<ValidationFilter>();
+                options.Filters.Add<NotFoundFilter>();
                 options.Filters.Add<ExceptionFilter>();
             }).AddJsonOptions(options =>
             {
@@ -33,7 +35,7 @@ namespace ManagementAPI
 
         public static IServiceCollection AddCustomServices(this IServiceCollection services)
         {
-            services.AddScoped<LoginService>();
+            services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();
@@ -84,7 +86,6 @@ namespace ManagementAPI
 
         public static IServiceCollection AddSwaggerExamples(this IServiceCollection services)
         {
-            services.AddSwaggerExamplesFromAssemblyOf<MailerRequestDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<LoginOtpResponseDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<LoginOtpRequestDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<SendOtpRequestDtoExample>();

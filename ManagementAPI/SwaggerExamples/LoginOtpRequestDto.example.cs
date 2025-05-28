@@ -1,5 +1,5 @@
 using Swashbuckle.AspNetCore.Filters;
-using ManagementAPI.DTO.AuthController;
+using ManagementAPI.DTO;
 
 namespace ManagementAPI.SwaggerExamples;
 

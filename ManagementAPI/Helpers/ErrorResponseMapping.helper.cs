@@ -4,7 +4,7 @@ namespace ManagementAPI.Helpers
 {
     public static class ErrorResponseMappingHelper
     {
-        /* Cria erros unitários */
+        /* create a single append error */
         public static ValidationStyleErrorDto Create(int status, string field, string message)
         {
             return new ValidationStyleErrorDto
@@ -17,7 +17,7 @@ namespace ManagementAPI.Helpers
             };
         }
 
-        /* Cria erros escalonados */
+        /* create a multiple append error */
         public static ValidationStyleErrorDto Create(int status, Dictionary<string, List<string>> errors)
         {
             return new ValidationStyleErrorDto
