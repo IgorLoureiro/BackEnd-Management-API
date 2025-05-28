@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ManagementAPI.DTO
 {
-    public class LoginRequest
+    public class LoginRequestDto
     {
         [Required]
         [EmailAddress]
@@ -11,7 +11,6 @@ namespace ManagementAPI.DTO
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, MinimumLength = 1)]
         [JsonPropertyName("password")]
         public string Password { get; set; } = string.Empty;
     }

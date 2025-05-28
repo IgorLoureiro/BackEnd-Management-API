@@ -1,11 +1,10 @@
-using ManagementAPI.DTO.AuthController;
 using ManagementAPI.DTO;
 
 namespace ManagementAPI.Interfaces
 {
     public interface ILoginService
     {
-        Task<string?> ValidateLoginAsync(LoginRequest User);
+        Task<string?> ValidateLoginAsync(LoginRequestDto User);
 
         Task<LoginOtpResponseDto?> ValidateLoginByOtp(LoginOtpRequestDto User);
 

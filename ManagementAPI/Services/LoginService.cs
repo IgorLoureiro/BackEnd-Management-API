@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using ManagementAPI.DTO;
-using ManagementAPI.DTO.AuthController;
 using ManagementAPI.Interfaces;
 using ManagementAPI.Helpers;
 
@@ -41,7 +40,7 @@ public class LoginService : ILoginService
         return _emailSenderAppPassword;
     }
 
-    public async Task<string?> ValidateLoginAsync(LoginRequest User)
+    public async Task<string?> ValidateLoginAsync(LoginRequestDto User)
     {
         var loginUser = await _userRepository.GetUserByEmailAsync(User.Email);
         if (loginUser == null) return null;

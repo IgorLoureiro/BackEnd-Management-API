@@ -1,9 +1,9 @@
-using ManagementAPI.Context;
 using ManagementAPI.DTO;
-using ManagementAPI.DTO.AuthController;
 using Microsoft.AspNetCore.Mvc;
 using ManagementAPI.Helpers;
 using ManagementAPI.Interfaces;
+using ManagementAPI.SwaggerExamples;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ManagementAPI.Controller;
 
@@ -21,9 +21,10 @@ public class AuthController : ControllerBase
 
     [HttpPost("Login")]
     [ProducesResponseType(typeof(LoginOtpResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Login([FromBody] LoginRequest User)
+    [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto User)
     {
         var token = await _loginService.ValidateLoginAsync(User);
 
@@ -34,8 +35,9 @@ public class AuthController : ControllerBase
 
     [HttpPost("login-otp")]
     [ProducesResponseType(typeof(LoginOtpResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
     public async Task<ActionResult<LoginOtpResponseDto>> LoginOtp([FromBody] LoginOtpRequestDto User)
     {
         var loginOtpResponse = await _loginService.ValidateLoginByOtp(User);
@@ -55,9 +57,9 @@ public class AuthController : ControllerBase
 
     [HttpPost("send-otp")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(SendOtpBadRequestDtoExample))]
     public async Task<IActionResult> SendOtp([FromBody] SendOtpRequestDto request)
     {
         try

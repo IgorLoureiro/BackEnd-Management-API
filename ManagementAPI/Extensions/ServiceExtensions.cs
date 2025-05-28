@@ -85,7 +85,6 @@ namespace ManagementAPI
 
         public static IServiceCollection AddSwaggerExamples(this IServiceCollection services)
         {
-            services.AddSwaggerExamplesFromAssemblyOf<MailerRequestDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<LoginOtpResponseDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<LoginOtpRequestDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<SendOtpRequestDtoExample>();
