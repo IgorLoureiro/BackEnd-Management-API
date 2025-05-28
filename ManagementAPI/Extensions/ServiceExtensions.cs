@@ -18,6 +18,7 @@ namespace ManagementAPI
             services.AddControllers(options =>
             {
                 options.Filters.Add<ValidationFilter>();
+                options.Filters.Add<NotFoundFilter>();
                 options.Filters.Add<ExceptionFilter>();
             }).AddJsonOptions(options =>
             {

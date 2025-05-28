@@ -14,17 +14,17 @@ namespace ManagementAPI.Services
             _defaultUserRepository = defaultUserRepository;
         }
 
-        public async Task<DefaultUserResponse?> GetUserByIdAsync(int id)
+        public async Task<UserResponseDto?> GetUserByIdAsync(int id)
         {
             var userTable = await _defaultUserRepository.GetUserByIdAsync(id);
             if (userTable == null) return null;
             return GenerateDefaultUserFromUserTable(userTable);
         }
 
-        public async Task<List<DefaultUserResponse>> GetListUserAsync(int limit, int page)
+        public async Task<List<UserResponseDto>> GetListUserAsync(int limit, int page)
         {
             var usersTableList = await _defaultUserRepository.GetUserListAsync(limit, page);
-            return usersTableList.Select(u => new DefaultUserResponse
+            return usersTableList.Select(u => new UserResponseDto
             {
                 Id = u.Id,
                 Username = u.Username,
@@ -32,14 +32,13 @@ namespace ManagementAPI.Services
             }).ToList();
         }
 
-        public async Task<UserServiceResult> CreateUserAsync(DefaultUserResponse defaultUser)
+        public async Task<UserServiceResult> CreateUserAsync(CreateUserRequestDto defaultUser)
         {
-            if (!ValidateDefaultUser(defaultUser, true))
-                return UserServiceResult.InvalidUser;
-
+            /* validate existing username */
             if (await _defaultUserRepository.GetUserByNameAsync(defaultUser.Username) != null)
                 return UserServiceResult.UsernameAlreadyExists;
 
+            /* validate existing email */
             if (await _defaultUserRepository.GetUserByEmailAsync(defaultUser.Email) != null)
                 return UserServiceResult.EmailAlreadyExists;
 
@@ -54,7 +53,7 @@ namespace ManagementAPI.Services
             return UserServiceResult.Success;
         }
 
-        public async Task<DefaultUserResponse?> UpdateUserAsync(int id, DefaultUserRequest defaultUser)
+        public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto defaultUser)
         {
             if (defaultUser == null) return null;
 
@@ -69,7 +68,7 @@ namespace ManagementAPI.Services
             return GenerateDefaultUserFromUserTable(userTableUpdated);
         }
 
-        public async Task<DefaultUserResponse?> DeleteUserByIdAsync(int id)
+        public async Task<UserResponseDto?> DeleteUserByIdAsync(int id)
         {
             var userTable = await _defaultUserRepository.GetUserByIdAsync(id);
             if (userTable == null) return null;
@@ -80,7 +79,7 @@ namespace ManagementAPI.Services
             return GenerateDefaultUserFromUserTable(userTable);
         }
 
-        private UserTable GenerateUserTableFromDefaultUser(DefaultUserResponse defaultUser)
+        private UserTable GenerateUserTableFromDefaultUser(CreateUserRequestDto defaultUser)
         {
             return new UserTable
             {
@@ -91,39 +90,38 @@ namespace ManagementAPI.Services
             };
         }
 
-        private DefaultUserResponse GenerateDefaultUserFromUserTable(UserTable userTable, bool generateWithPassword = false)
+        private UserResponseDto GenerateDefaultUserFromUserTable(UserTable userTable)
         {
-            var defaultUser = new DefaultUserResponse
+            var defaultUser = new UserResponseDto
             {
                 Id = userTable.Id,
                 Username = userTable.Username,
                 Email = userTable.Email,
+                Role = userTable.Role,
             };
-
-            if (generateWithPassword)
-                defaultUser.Password = userTable.Password;
 
             return defaultUser;
         }
 
-        private bool ValidateDefaultUser(DefaultUserResponse defaultUser, bool validateWithPassword = false)
+        private bool ValidateDefaultUser(CreateUserRequestDto defaultUser, bool validateWithPassword = false)
         {
             if (validateWithPassword)
             {
                 if (defaultUser == null) return false;
                 if (defaultUser.Username == null) return false;
-                if (defaultUser.Password == null) return false;
                 if (defaultUser.Email == null) return false;
+                if (defaultUser.Password == null) return false;
                 return true;
             }
 
             if (defaultUser == null) return false;
             if (defaultUser.Username == null) return false;
             if (defaultUser.Email == null) return false;
+
             return true;
         }
 
-        private UserTable MapFieldsToChange(UserTable userTable, DefaultUserRequest defaultUser)
+        private UserTable MapFieldsToChange(UserTable userTable, UpdateUserRequestDto defaultUser)
         {
             if (!string.IsNullOrWhiteSpace(defaultUser.Username) &&
                     defaultUser.Username.Length >= 6 &&
@@ -144,6 +142,11 @@ namespace ManagementAPI.Services
                 !PasswordEncryptionHelper.VerifyPassword(defaultUser.Password, userTable.Password))
             {
                 userTable.Password = PasswordEncryptionHelper.HashPassword(defaultUser.Password);
+            }
+
+            if (!string.IsNullOrWhiteSpace(defaultUser.Role))
+            {
+                userTable.Role = defaultUser.Role;
             }
 
             return userTable;

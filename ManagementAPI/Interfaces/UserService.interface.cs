@@ -5,10 +5,10 @@ namespace ManagementAPI.Interfaces
 {
     public interface IUserService
     {
-        Task<DefaultUserResponse?> GetUserByIdAsync(int id);
-        Task<UserServiceResult> CreateUserAsync(DefaultUserResponse defaultUser);
-        Task<DefaultUserResponse?> UpdateUserAsync(int id, DefaultUserRequest defaultUser);
-        Task<DefaultUserResponse?> DeleteUserByIdAsync(int id);
-        Task<List<DefaultUserResponse>> GetListUserAsync(int limit, int page);
+        Task<UserServiceResult> CreateUserAsync(CreateUserRequestDto defaultUser);
+        Task<List<UserResponseDto>> GetListUserAsync(int limit, int page);
+        Task<UserResponseDto?> GetUserByIdAsync(int id);
+        Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto defaultUser);
+        Task<UserResponseDto?> DeleteUserByIdAsync(int id);
     }
 }

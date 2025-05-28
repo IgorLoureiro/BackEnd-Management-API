@@ -45,16 +45,18 @@ namespace ManagementAPI.Repository
             return userTable;
         }
 
-        public async Task<UserTable?> DeleteUser(UserTable userTable)
-        {
-            _dbContext.User.Remove(userTable);
-            await _dbContext.SaveChangesAsync();
-            return userTable;
-        }
+
 
         public async Task<UserTable?> UpdateUser(UserTable userTable)
         {
             _dbContext.User.Update(userTable);
+            await _dbContext.SaveChangesAsync();
+            return userTable;
+        }
+
+        public async Task<UserTable?> DeleteUser(UserTable userTable)
+        {
+            _dbContext.User.Remove(userTable);
             await _dbContext.SaveChangesAsync();
             return userTable;
         }
