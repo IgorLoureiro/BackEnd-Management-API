@@ -1,33 +1,37 @@
+
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ManagementAPI.Interfaces;
 
-namespace ManagementAPI.Services;
-
-public class JwtService : IJwtService
+namespace ManagementAPI.Services
 {
-    private readonly string _secret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT Secret não configurado.");
-    private readonly string _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? throw new InvalidOperationException("JWT Issuer não configurado.");
-    private readonly string _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? throw new InvalidOperationException("JWT Audience não configurado.");
-    private readonly double _expirationMinutes = double.Parse(Environment.GetEnvironmentVariable("JWT_EXPIRE") ?? "30");
 
-    public string GenerateToken(IEnumerable<Claim> claims)
+
+    public class JwtService() : IJwtService
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        private readonly string _secret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new Exception("JWT Secret não configurado.");
+        private readonly string _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? throw new Exception("JWT Issuer não configurado.");
+        private readonly string _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? throw new Exception("JWT Audience não configurado.");
+        private readonly double _expirationMinutes = double.Parse(Environment.GetEnvironmentVariable("JWT_EXPIRE") ?? "30");
 
-        var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_expirationMinutes),
-            signingCredentials: creds
-        );
+        public string GerarToken(IEnumerable<Claim> claims)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var bearerToken = new JwtSecurityTokenHandler().WriteToken(token);
-        return bearerToken;
+            var token = new JwtSecurityToken(
+                issuer: _issuer,
+                audience: _audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(_expirationMinutes),
+                signingCredentials: creds
+            );
+
+            var bearerToken = "Bearer " + new JwtSecurityTokenHandler().WriteToken(token);
+            return bearerToken;
+        }
     }
 }
 

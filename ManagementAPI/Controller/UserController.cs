@@ -1,6 +1,7 @@
 ﻿using ManagementAPI.DTO;
 using ManagementAPI.Helpers;
-using ManagementAPI.Interfaces;
+using ManagementAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ManagementAPI.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
@@ -8,6 +9,7 @@ using Swashbuckle.AspNetCore.Filters;
 namespace ManagementAPI.Controller
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class UserController : ControllerBase
     {

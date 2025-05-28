@@ -1,7 +1,10 @@
-﻿using ManagementAPI.Repository;
+﻿using System.Text;
+using ManagementAPI.Repository;
 using ManagementAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using DbContext = ManagementAPI.Context.DbContext;
 using ManagementAPI.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
@@ -39,8 +42,7 @@ namespace ManagementAPI
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();
-            services.AddScoped<IMailerService, MailerService>();
-
+            services.AddScoped<IJwtService, JwtService>();
             return services;
         }
 
@@ -89,6 +91,59 @@ namespace ManagementAPI
             services.AddSwaggerExamplesFromAssemblyOf<LoginOtpResponseDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<LoginOtpRequestDtoExample>();
             services.AddSwaggerExamplesFromAssemblyOf<SendOtpRequestDtoExample>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddJwt(this IServiceCollection services)
+        {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false; // deixar true em produção
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
+                    ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET") ?? ""))
+                };
+            });
+
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Bearer {token}"
+                });
+
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
 
             return services;
         }
