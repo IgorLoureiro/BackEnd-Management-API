@@ -1,5 +1,5 @@
-﻿using ManagementAPI.Context;
-using ManagementAPI.Models;
+﻿using ManagementAPI.Models;
+using ManagementAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using DbContext = ManagementAPI.Context.DbContext;
 
@@ -29,12 +29,12 @@ namespace ManagementAPI.Repository
             return await _dbContext.User.FirstOrDefaultAsync(ut => ut.Email.Equals(email));
         }
 
-        public async Task<List<UserTable>> GetUserListAsync(int usersPerPage, int page)
+        public async Task<List<UserTable>> GetUserListAsync(int limit, int page)
         {
             return await _dbContext.User
-                .OrderBy(u => u.Id) 
-                .Skip((page - 1) * usersPerPage)
-                .Take(usersPerPage)
+                .OrderBy(u => u.Id)
+                .Skip((page - 1) * limit)
+                .Take(limit)
                 .ToListAsync();
         }
 
@@ -45,16 +45,18 @@ namespace ManagementAPI.Repository
             return userTable;
         }
 
-        public async Task<UserTable?> DeleteUser(UserTable userTable)
-        {
-            _dbContext.User.Remove(userTable);
-            await _dbContext.SaveChangesAsync();
-            return userTable;
-        }
+
 
         public async Task<UserTable?> UpdateUser(UserTable userTable)
         {
             _dbContext.User.Update(userTable);
+            await _dbContext.SaveChangesAsync();
+            return userTable;
+        }
+
+        public async Task<UserTable?> DeleteUser(UserTable userTable)
+        {
+            _dbContext.User.Remove(userTable);
             await _dbContext.SaveChangesAsync();
             return userTable;
         }

@@ -1,18 +1,21 @@
 ﻿# Trabalho Acadêmico
  
 ## Rodando o Projeto Localmente
+
 Para rodar o código localmente é necessário um banco Mysql (no nosso caso optamos por usar um container docker)
 
 Dentro da pasta do projeto rodamos os seguintes comandos
 
+
 ``` bash
 docker compose up
 ```
-(caso não queira usar o docker basta usar um mysql e alterar a url de conexão do arquivo .env)
+sar o docker basta usar um mysql e alterar a url de conexão do arquivo .env)
 
 Copie o .env example e crie um .env colocando os valores reais das variaveis
 
 abrimos outro terminal e rodamos a api:
+
 ``` bash
 dotnet run
 ```
@@ -20,6 +23,7 @@ dotnet run
 Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para melhorar a **legibilidade**, **manutenção** e **eficiência** do código, sem alterar sua funcionalidade.
 
 ---
+
 
 ## 📌 Atividades  
 - Identificar problemas e refatorar utilizando boas práticas de **Clean Code**
@@ -63,4 +67,21 @@ JWT_EXPIRE=30
 EMAIL_SENDER=teste@gmail.com
 EMAIL_SENDER_NAME=teste
 EMAIL_SENDER_APP_PASSWORD=mySecurePass
+```
+
+Script SQL:
+
+```
+CREATE TABLE `user` (
+   `id` INT AUTO_INCREMENT NOT NULL,
+   `username` VARCHAR(255) NOT NULL,
+   `password` VARCHAR(255) NOT NULL,
+   `email` VARCHAR(255) NOT NULL,
+   `role` ENUM("admin", "user") NOT NULL default "user",
+   `passwordRecovery` VARCHAR(255) NULL,
+   `otpCode` VARCHAR(255) NULL,
+   `otpExpiration` DATETIME NULL,
+
+   PRIMARY KEY(`id`)
+);
 ```

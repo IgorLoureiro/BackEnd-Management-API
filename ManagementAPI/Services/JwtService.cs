@@ -1,3 +1,4 @@
+
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -32,6 +33,5 @@ namespace ManagementAPI.Services
             return bearerToken;
         }
     }
-
 }
 

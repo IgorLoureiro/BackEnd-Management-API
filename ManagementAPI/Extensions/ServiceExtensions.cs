@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using DbContext = ManagementAPI.Context.DbContext;
+using ManagementAPI.SwaggerExamples;
+using Swashbuckle.AspNetCore.Filters;
+using ManagementAPI.Interfaces;
+using ManagementAPI.Interceptors;
+using System.Text.Json.Serialization;
 
 namespace ManagementAPI
 {
@@ -16,7 +21,11 @@ namespace ManagementAPI
             services.AddControllers(options =>
             {
                 options.Filters.Add<ValidationFilter>();
+                options.Filters.Add<NotFoundFilter>();
                 options.Filters.Add<ExceptionFilter>();
+            }).AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
             services.Configure<ApiBehaviorOptions>(options =>
@@ -31,6 +40,7 @@ namespace ManagementAPI
         {
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IDefaultUserRepository, DefaultUserRepository>();
             services.AddScoped<IJwtService, JwtService>();
             return services;
@@ -38,7 +48,7 @@ namespace ManagementAPI
 
         public static IServiceCollection AddCustomDatabase(this IServiceCollection services)
         {
-            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
             services.AddDbContext<DbContext>(options =>
             {
@@ -67,7 +77,21 @@ namespace ManagementAPI
         public static IServiceCollection AddSwagger(this IServiceCollection services)
         {
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(options =>
+            {
+                options.EnableAnnotations();
+                options.ExampleFilters();
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddSwaggerExamples(this IServiceCollection services)
+        {
+            services.AddSwaggerExamplesFromAssemblyOf<LoginOtpResponseDtoExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<LoginOtpRequestDtoExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<SendOtpRequestDtoExample>();
+
             return services;
         }
 
