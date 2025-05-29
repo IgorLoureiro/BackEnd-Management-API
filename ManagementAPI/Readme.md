@@ -20,6 +20,12 @@ abrimos outro terminal e rodamos a api:
 dotnet run
 ```
 
+## Comandos de Build
+
+dotnet clean
+dotnet restore
+dotnet build
+
 ## 🎯 Objetivo
 
 Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para melhorar a **legibilidade**, **manutenção** e **eficiência** do código, sem alterar sua funcionalidade.
