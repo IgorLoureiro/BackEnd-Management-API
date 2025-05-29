@@ -1,31 +1,33 @@
 ﻿# Trabalho Acadêmico
- 
+
 ## Rodando o Projeto Localmente
 
 Para rodar o código localmente é necessário um banco Mysql (no nosso caso optamos por usar um container docker)
 
 Dentro da pasta do projeto rodamos os seguintes comandos
 
-
-``` bash
+```bash
 docker compose up
 ```
-sar o docker basta usar um mysql e alterar a url de conexão do arquivo .env)
+
+(caso não queira usar o docker basta usar um mysql e alterar a url de conexão do arquivo .env)
 
 Copie o .env example e crie um .env colocando os valores reais das variaveis
 
 abrimos outro terminal e rodamos a api:
 
-``` bash
+```bash
 dotnet run
 ```
-## 🎯 Objetivo  
+
+## 🎯 Objetivo
+
 Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para melhorar a **legibilidade**, **manutenção** e **eficiência** do código, sem alterar sua funcionalidade.
 
 ---
 
+## 📌 Atividades
 
-## 📌 Atividades  
 - Identificar problemas e refatorar utilizando boas práticas de **Clean Code**
 - Aplicar pelo menos um **Design Pattern**
 - Implementar **testes unitários**
@@ -34,11 +36,12 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para 
 ---
 
 ## 📝 Critérios de Avaliação
-- **Legibilidade:** Nomes claros e código organizado  
-- **Estrutura:** Modularização e redução de repetições  
-- **Documentação:** Comentários apenas quando necessário  
-- **Boas práticas:** Aplicação de princípios **SOLID**, **DRY**, **KISS** e **YAGNI**  
-- **Testes unitários** implementados e validados  
+
+- **Legibilidade:** Nomes claros e código organizado
+- **Estrutura:** Modularização e redução de repetições
+- **Documentação:** Comentários apenas quando necessário
+- **Boas práticas:** Aplicação de princípios **SOLID**, **DRY**, **KISS** e **YAGNI**
+- **Testes unitários** implementados e validados
 - **Versionamento público** via **GitHub**
 
 ---
@@ -46,6 +49,7 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para 
 ## 📅 Entregas
 
 ### 📌 1 de junho de 2025
+
 - 📄 PDF no **Ulife** contendo:
   - Código original com deficiências identificadas
   - Código refatorado com justificativas das mudanças
@@ -58,8 +62,9 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para 
 [ARQUIVO PARA ENTREGA](https://docs.google.com/document/d/12hYDcAg29dHkn7aEFC8bcyYv-Xd_OSCnnwZ3GkMcCf8/edit?usp=sharing)
 
 Exemplo de .env:
+
 ```
-CONNECTION_STRING=server=localhost;database=management_cs_api;user=root;password=2004;    
+DB_CONNECTION_STRING=server=localhost;database=management_cs_api;user=root;password=2004;
 JWT_ISSUER=http://localhost:5215/
 JWT_AUDIENCE=http://localhost:5215/
 JWT_SECRET=IZAqg5Mg2Jv0o09XJAoO1QbiQUHhFl9wlaWibYvePxVS7VZwazsaR4yBYTgA893K
