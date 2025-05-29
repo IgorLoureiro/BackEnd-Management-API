@@ -4,10 +4,12 @@ using ManagementAPI.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using ManagementAPI.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ManagementAPI.Controller
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
@@ -17,6 +19,7 @@ namespace ManagementAPI.Controller
             _userService = userService;
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
@@ -51,6 +54,7 @@ namespace ManagementAPI.Controller
             return Ok(result);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
@@ -65,6 +69,7 @@ namespace ManagementAPI.Controller
             return Ok(updatedUser);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(NotFoundErrorDto), StatusCodes.Status404NotFound)]
