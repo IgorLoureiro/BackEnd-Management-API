@@ -11,7 +11,7 @@ builder.Services
     .AddCustomDatabase()
     .AddCustomCors()
     .AddSwagger()
-    .AddJwt();
+    .AddSwaggerExamples();
 
 var app = builder.Build();
 
@@ -20,8 +20,6 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AllowSpecificOrigin");
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+// app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
