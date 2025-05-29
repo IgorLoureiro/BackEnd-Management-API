@@ -12,10 +12,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace ManagementAPI
+namespace ManagementAPI.Extensions
 {
     public static class ServiceExtensions
     {
+        private const string SecuritySchemeName = "Bearer";
+
         public static IServiceCollection AddCustomControllers(this IServiceCollection services)
         {
             services.AddControllers(options =>
@@ -77,6 +79,7 @@ namespace ManagementAPI
 
         public static IServiceCollection AddSwagger(this IServiceCollection services)
         {
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
             {
@@ -86,12 +89,12 @@ namespace ManagementAPI
 
             services.AddSwaggerGen(c =>
             {
-                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                c.AddSecurityDefinition(SecuritySchemeName, new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
                     Name = "Authorization",
                     Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Bearer {token}"
+                    Description = string.Join(SecuritySchemeName, " {token}") 
                 });
 
                 c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -102,10 +105,10 @@ namespace ManagementAPI
                             Reference = new Microsoft.OpenApi.Models.OpenApiReference
                             {
                                 Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                                Id = "Bearer"
+                                Id = SecuritySchemeName
                             }
                         },
-                        new string[] {}
+                        Array.Empty<string>()
                     }
                 });
             });
@@ -123,7 +126,7 @@ namespace ManagementAPI
             })
             .AddJwtBearer(options =>
             {
-                options.RequireHttpsMetadata = false; // deixe true em produção
+                options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

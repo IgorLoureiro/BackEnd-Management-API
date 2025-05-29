@@ -1,7 +1,7 @@
 using dotenv.net;
-using ManagementAPI;
+using ManagementAPI.Extensions;
 using ManagementAPI.Helpers;
-using ManagementAPI.Middleware;
+using ManagementAPI.Middlewares;
 
 DotEnv.Load();
 
