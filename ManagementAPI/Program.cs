@@ -1,5 +1,7 @@
 using dotenv.net;
-using ManagementAPI;
+using ManagementAPI.Extensions;
+using ManagementAPI.Helpers;
+using ManagementAPI.Middlewares;
 
 DotEnv.Load();
 
@@ -11,10 +13,12 @@ builder.Services
     .AddCustomDatabase()
     .AddCustomCors()
     .AddSwagger()
-    .AddSwaggerExamples();
+    .AddSwaggerExamples()
+    .AddJwt();
 
 var app = builder.Build();
 
+app.UseMiddleware<AuthMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAuthentication();
@@ -22,4 +26,11 @@ app.UseAuthorization();
 app.UseCors("AllowSpecificOrigin");
 // app.UseHttpsRedirection();
 app.MapControllers();
+
+// seed database
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ManagementAPI.Context.DbContext>();
+    DatabaseSeeder.Seed(context);
+}
 app.Run();

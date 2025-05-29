@@ -60,7 +60,7 @@ public class LoginService : ILoginService
 
         /* return token */
         var token = _jwtService.GenerateToken(claims);
-        return token;
+        return "Bearer " + token;
     }
 
     public async Task<LoginOtpResponseDto?> ValidateLoginByOtp(LoginOtpRequestDto User)

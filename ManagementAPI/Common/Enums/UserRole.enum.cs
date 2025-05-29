@@ -1,4 +1,4 @@
-namespace ManagementAPI.Enums;
+namespace ManagementAPI.Common.Enums;
 
 public enum UserRole
 {

@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
 
         if (token == null) return Unauthorized(new { Message = "Invalid username or password." });
 
-        return Ok(new { token = token });
+        return Ok(new { token });
     }
 
     [HttpPost("login-otp")]
