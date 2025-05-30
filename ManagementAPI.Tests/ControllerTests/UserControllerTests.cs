@@ -1,10 +1,10 @@
-﻿using Moq;
-using ManagementAPI.Controller;
+﻿using ManagementAPI.Controller;
 using ManagementAPI.Interfaces;
 using ManagementAPI.DTO;
 using Microsoft.AspNetCore.Mvc;
 using ManagementAPI.Enums;
 using System.Collections.Generic;
+using Moq;
 
 namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
 {
@@ -22,6 +22,7 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
         [Fact]
         public async Task CreateUser_WhenUserIsValid_ShouldReturnCreated()
         {
+            // Arrange
             var dto = new CreateUserRequestDto
             {
                 Username = "test",
@@ -34,8 +35,10 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
                 .Setup(s => s.CreateUserAsync(dto))
                 .ReturnsAsync(UserServiceResult.Success);
 
+            // Act
             var result = await _controller.CreateUser(dto);
 
+            // Assert
             var statusCodeResult = Assert.IsType<StatusCodeResult>(result);
             Assert.Equal(201, statusCodeResult.StatusCode);
         }
@@ -43,18 +46,20 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
         [Fact]
         public async Task GetUsersList_WhenCalled_ShouldReturnOkWithUserList()
         {
+            // Arrange
             var users = new List<UserResponseDto>
                 {
                     new UserResponseDto { Id = 1, Username = "user1", Email = "user1@email.com", Role = "admin" }
                 };
 
-
             _mockUserService
                 .Setup(s => s.GetListUserAsync(It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(users);
 
+            // Act
             var result = await _controller.GetUsersList();
 
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnedUsers = Assert.IsAssignableFrom<IEnumerable<UserResponseDto>>(okResult.Value);
             Assert.Single(returnedUsers);
@@ -63,14 +68,17 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
         [Fact]
         public async Task GetUser_WhenUserExists_ShouldReturnOkWithUser()
         {
+            // Arrange
             var user = new UserResponseDto { Id = 1, Username = "user1", Email = "email", Role = "admin" };
 
             _mockUserService
                 .Setup(s => s.GetUserByIdAsync(1))
                 .ReturnsAsync(user);
 
+            // Act
             var result = await _controller.GetUser(1);
 
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnedUser = Assert.IsType<UserResponseDto>(okResult.Value);
             Assert.Equal(1, returnedUser.Id);
@@ -79,12 +87,15 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
         [Fact]
         public async Task GetUser_WhenUserDoesNotExist_ShouldReturnNotFound()
         {
+            // Arrange
             _mockUserService
                 .Setup(s => s.GetUserByIdAsync(999))
                 .ReturnsAsync((UserResponseDto)null);
 
+            // Act
             var result = await _controller.GetUser(999);
 
+            // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Contains("Not Found", notFoundResult.Value.ToString());
         }
@@ -92,6 +103,7 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
         [Fact]
         public async Task UpdateUser_WhenUserExists_ShouldReturnOkWithUpdatedUser()
         {
+            // Arrange
             var newEmail = "new@email.com";
             var updateDto = new UpdateUserRequestDto { Email = newEmail, Role = "user" };
             var updatedUser = new UserResponseDto { Id = 1, Username = "user1", Email = newEmail, Role = "user" };
@@ -100,8 +112,10 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
                 .Setup(s => s.UpdateUserAsync(1, updateDto))
                 .ReturnsAsync(updatedUser);
 
+            // Act
             var result = await _controller.UpdateUser(1, updateDto);
 
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnedUser = Assert.IsType<UserResponseDto>(okResult.Value);
             Assert.Equal(newEmail, returnedUser.Email);
@@ -110,14 +124,17 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
         [Fact]
         public async Task UpdateUser_WhenUserDoesNotExist_ShouldReturnNotFound()
         {
+            // Arrange
             var updateDto = new UpdateUserRequestDto { Email = "none", Role = "none" };
 
             _mockUserService
                 .Setup(s => s.UpdateUserAsync(99, updateDto))
                 .ReturnsAsync((UserResponseDto)null);
 
+            // Act
             var result = await _controller.UpdateUser(99, updateDto);
 
+            // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Contains("Not Found", notFoundResult.Value.ToString());
         }
@@ -137,22 +154,24 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
             var result = await _controller.DeleteUser(userId);
 
             // Assert
-            Assert.NotNull(result);  
-            var okResult = Assert.IsType<OkResult>(result);  
-            Assert.Equal(200, okResult.StatusCode); 
-            _mockUserService.Verify(s => s.DeleteUserByIdAsync(userId), Times.Once); 
+            Assert.NotNull(result);
+            var okResult = Assert.IsType<OkResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+            _mockUserService.Verify(s => s.DeleteUserByIdAsync(userId), Times.Once);
         }
-
 
         [Fact]
         public async Task DeleteUser_WhenUserDoesNotExist_ShouldReturnNotFound()
         {
+            // Arrange
             _mockUserService
                 .Setup(s => s.DeleteUserByIdAsync(999))
                 .ReturnsAsync((UserResponseDto)null);
 
+            // Act
             var result = await _controller.DeleteUser(999);
 
+            // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Contains("Not Found", notFoundResult.Value.ToString());
         }
