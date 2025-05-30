@@ -1,7 +1,6 @@
-## Build output
-bin/
-obj/
-
+# Build output
+**bin/
+**obj/
 # Rider
 .idea/
 *.sln.iml
@@ -31,8 +30,8 @@ Thumbs.db
 .DS_Store
 
 # Test Results
-TestResult*/ 
-*.trx
+# TestResult*/ 
+# *.trx
 
 # NuGet
 project.lock.json
