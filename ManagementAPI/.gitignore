@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 # Build
 **bin/
 **obj/
+=======
+## Build output
+bin/
+obj/
+>>>>>>> 2cad827c56079cf253730a2999db817bbb52c4f2
 
 # Rider
 .idea/
@@ -58,5 +64,7 @@ secrets.json
 # Outros
 *.sqlite
 *.db
+
+## Ignore arquivos de configuração de ambiente 
 *.bak
 *.swp

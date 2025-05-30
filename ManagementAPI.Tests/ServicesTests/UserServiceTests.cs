@@ -1,120 +1,168 @@
-﻿using System.Threading.Tasks;
-using ManagementAPI.DTO;        
+﻿using ManagementAPI.DTO;
+using ManagementAPI.Enums;
+using ManagementAPI.Helpers; 
+using ManagementAPI.Interfaces;
 using ManagementAPI.Models;
-using ManagementAPI.Repository;
 using ManagementAPI.Services;
 using Moq;
-using Xunit;
 
-public class UserServiceTests
+namespace ManagementAPI.Tests.ManagementAPI.Tests.ServicesTests
 {
-    private readonly Mock<IDefaultUserRepository> _mockRepo;
-    private readonly UserService _userService;
-
-    public UserServiceTests()
+    public class UserServiceTests
     {
-        _mockRepo = new Mock<IDefaultUserRepository>();
-        _userService = new UserService(_mockRepo.Object);
-    }
+        private readonly Mock<IDefaultUserRepository> _repositoryMock;
+        private readonly UserService _service;
 
-    [Fact]
-    public async Task UpdateUserAsync_ShouldReturnNull_WhenDefaultUserIsNull()
-    {
-        // Act
-        var result = await _userService.UpdateUserAsync(1, null);
-
-        // Assert
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task UpdateUserAsync_ShouldReturnNull_WhenUserNotFound()
-    {
-        // Arrange
-        _mockRepo.Setup(r => r.GetUserByIdAsync(It.IsAny<int>()))
-                 .ReturnsAsync((UserTable)null);
-
-        // Act
-        var result = await _userService.UpdateUserAsync(1, new DefaultUserRequest { Username = "newUser" });
-
-        // Assert
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task UpdateUserAsync_ShouldReturnUpdatedUser_WhenUpdateSuccessful()
-    {
-        // Arrange
-        var id = 1;
-
-        var oldPasswordHash = BCrypt.Net.BCrypt.HashPassword("oldPassword");
-
-        var existingUser = new UserTable
+        public UserServiceTests()
         {
-            Id = id,
-            Username = "oldUser",
-            Email = "old@email.com",
-            Password = oldPasswordHash
-        };
+            _repositoryMock = new Mock<IDefaultUserRepository>();
+            _service = new UserService(_repositoryMock.Object);
+        }
 
-        var updateData = new DefaultUserRequest
+        [Fact]
+        public async Task GetUserByIdAsync_ShouldReturnUserResponseDto_WhenUserExists()
         {
-            Username = "newUser",
-            Email = "new@email.com",
-            Password = "newPassword"
-        };
+            var user = new UserTable { Id = 1, Username = "Franciely", Email = "fran@email.com", Role = "admin" };
+            _repositoryMock.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
-        _mockRepo.Setup(r => r.GetUserByIdAsync(id))
-                 .ReturnsAsync(existingUser);
+            var result = await _service.GetUserByIdAsync(1);
 
-        _mockRepo.Setup(r => r.UpdateUser(It.IsAny<UserTable>()))
-                 .ReturnsAsync((UserTable updatedUser) => updatedUser);
+            Assert.NotNull(result);
+            Assert.Equal("Franciely", result!.Username);
+        }
 
-        // Act
-        var result = await _userService.UpdateUserAsync(id, updateData);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(updateData.Username, result.Username);
-        Assert.Equal(updateData.Email, result.Email);
-        Assert.NotEqual(existingUser.Password, result.Password);
-    }
-
-    [Fact]
-    public async Task DeleteUserByIdAsync_ShouldReturnNull_WhenUserNotFound()
-    {
-        // Arrange
-        _mockRepo.Setup(r => r.GetUserByIdAsync(It.IsAny<int>()))
-                 .ReturnsAsync((UserTable)null);
-
-        // Act
-        var result = await _userService.DeleteUserByIdAsync(1);
-
-        // Assert
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task DeleteUserByIdAsync_ShouldReturnDeletedUser_WhenDeleteSuccessful()
-    {
-        // Arrange
-        var existingUser = new UserTable
+        [Fact]
+        public async Task GetUserByIdAsync_ShouldReturnNull_WhenUserNotExists()
         {
-            Id = 1,
-            Username = "userToDelete",
-            Email = "delete@email.com",
-            Password = "hash"
-        };
+            _repositoryMock.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync((UserTable?)null);
 
-        _mockRepo.Setup(r => r.GetUserByIdAsync(existingUser.Id))
-                 .ReturnsAsync(existingUser);
+            var result = await _service.GetUserByIdAsync(1);
 
-        // Act
-        var result = await _userService.DeleteUserByIdAsync(existingUser.Id);
+            Assert.Null(result);
+        }
 
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(existingUser.Id, result.Id);
-        Assert.Equal(existingUser.Username, result.Username);
+        [Fact]
+        public async Task GetListUserAsync_ShouldReturnListOfUsers()
+        {
+            var users = new List<UserTable>
+            {
+                new UserTable { Id = 1, Username = "A", Email = "a@email.com" },
+                new UserTable { Id = 2, Username = "B", Email = "b@email.com" }
+            };
+            _repositoryMock.Setup(r => r.GetUserListAsync(2, 1)).ReturnsAsync(users);
+
+            var result = await _service.GetListUserAsync(2, 1);
+
+            Assert.Equal(2, result.Count);
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldReturnUsernameAlreadyExists()
+        {
+            _repositoryMock.Setup(r => r.GetUserByNameAsync("Franciely")).ReturnsAsync(new UserTable());
+
+            var result = await _service.CreateUserAsync(new CreateUserRequestDto
+            {
+                Username = "Franciely",
+                Email = "nova@email.com",
+                Password = "123456",
+                Role = "user"
+            });
+
+            Assert.Equal(UserServiceResult.UsernameAlreadyExists, result);
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldReturnEmailAlreadyExists()
+        {
+            _repositoryMock.Setup(r => r.GetUserByNameAsync("Nova")).ReturnsAsync((UserTable?)null);
+            _repositoryMock.Setup(r => r.GetUserByEmailAsync("fran@email.com")).ReturnsAsync(new UserTable());
+
+            var result = await _service.CreateUserAsync(new CreateUserRequestDto
+            {
+                Username = "Nova",
+                Email = "fran@email.com",
+                Password = "123456",
+                Role = "user"
+            });
+
+            Assert.Equal(UserServiceResult.EmailAlreadyExists, result);
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldReturnSuccess()
+        {
+            _repositoryMock.Setup(r => r.GetUserByNameAsync("Nova")).ReturnsAsync((UserTable?)null);
+            _repositoryMock.Setup(r => r.GetUserByEmailAsync("nova@email.com")).ReturnsAsync((UserTable?)null);
+            _repositoryMock.Setup(r => r.CreateUserAsync(It.IsAny<UserTable>())).ReturnsAsync(new UserTable());
+
+            var result = await _service.CreateUserAsync(new CreateUserRequestDto
+            {
+                Username = "Nova",
+                Email = "nova@email.com",
+                Password = "123456",
+                Role = "user"
+            });
+
+            Assert.Equal(UserServiceResult.Success, result);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldUpdateAndReturnUserResponseDto()
+        {
+            var original = new UserTable
+            {
+                Id = 1,
+                Username = "Franciely",
+                Email = "old@email.com",
+                Password = PasswordEncryptionHelper.HashPassword("123456"), // ✅ Corrigido
+                Role = "user"
+            };
+
+            _repositoryMock.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(original);
+            _repositoryMock.Setup(r => r.UpdateUser(It.IsAny<UserTable>())).ReturnsAsync(original);
+
+            var result = await _service.UpdateUserAsync(1, new UpdateUserRequestDto
+            {
+                Email = "new@email.com",
+                Username = "FranNova",
+                Password = "novaSenha",
+                Role = "admin"
+            });
+
+            Assert.NotNull(result);
+            Assert.Equal("FranNova", result!.Username);
+            Assert.Equal("new@email.com", result.Email);
+        }
+
+        [Fact]
+        public async Task DeleteUserByIdAsync_ShouldDeleteAndReturnUserResponseDto()
+        {
+            var user = new UserTable
+            {
+                Id = 1,
+                Username = "Franciely",
+                Email = "fran@email.com",
+                Role = "admin"
+            };
+
+            _repositoryMock.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
+            _repositoryMock.Setup(r => r.DeleteUser(user)).ReturnsAsync(user);
+
+            var result = await _service.DeleteUserByIdAsync(1);
+
+            Assert.NotNull(result);
+            Assert.Equal("Franciely", result!.Username);
+        }
+
+        [Fact]
+        public async Task DeleteUserByIdAsync_ShouldReturnNull_WhenUserNotFound()
+        {
+            _repositoryMock.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync((UserTable?)null);
+
+            var result = await _service.DeleteUserByIdAsync(1);
+
+            Assert.Null(result);
+        }
     }
 }

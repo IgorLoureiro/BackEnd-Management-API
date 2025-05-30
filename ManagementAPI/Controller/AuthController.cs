@@ -1,10 +1,9 @@
-using ManagementAPI.Context;
 using ManagementAPI.DTO;
-using ManagementAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using MailKit.Net.Smtp;
-using MimeKit;
-using Newtonsoft.Json;
+using ManagementAPI.Helpers;
+using ManagementAPI.Interfaces;
+using ManagementAPI.SwaggerExamples;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ManagementAPI.Controller;
 
@@ -13,178 +12,66 @@ namespace ManagementAPI.Controller;
 
 public class AuthController : ControllerBase
 {
+    private readonly ILoginService _loginService;
 
-    private readonly LoginService _loginService;
-    private readonly DbContext _dbContext;
-
-    public AuthController(DbContext dbContext, LoginService loginService) : base()
+    public AuthController(ILoginService loginService) : base()
     {
-        _dbContext = dbContext;
         _loginService = loginService;
     }
 
-    [HttpPost("Register")]
-    public IActionResult Register([FromBody] DefaultUserResponse signUp)
-    {
-        if (signUp == null)
-        {
-            return BadRequest(new { Message = "Invalid sign-up data." });
-        }
-
-        var existingUserByUsername = _dbContext.User.FirstOrDefault(u => u.Username == signUp.Username);
-        if (existingUserByUsername != null)
-        {
-            return Conflict(new { Message = "Username is already taken.", Code = 1 });
-        }
-
-        var existingUserByEmail = _dbContext.User.FirstOrDefault(u => u.Email == signUp.Email);
-        if (existingUserByEmail != null)
-        {
-            return Conflict(new { Message = "Email is already in use.", Code = 2 });
-        }
-
-        return Ok(new { Message = "User registered successfully" });
-    }
-
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] DefaultUserResponse User)
+    [ProducesResponseType(typeof(LoginOtpResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto User)
     {
-        var loginUser = _dbContext.User.FirstOrDefault(u => u.Email == User.Email);
+        var token = await _loginService.ValidateLoginAsync(User);
 
-        if (loginUser == null)
-        {
-            return Unauthorized(new { Message = "Invalid username or password." });
-        }
+        if (token == null) return Unauthorized(new { Message = "Invalid username or password." });
 
-        if (!BCrypt.Net.BCrypt.Verify(User.Password, loginUser.Password))
-        {
-            return Unauthorized(new { Message = "Invalid username or password." });
-        }
-
-        return Ok(new { Message = "User logged in successfully.", loginUser });
+        return Ok(new { token = token });
     }
 
-    [HttpPost("SendRecoverAccount")]
-    public IActionResult SendRecoverAccount([FromBody] RequestRecover requestRecover)
+    [HttpPost("login-otp")]
+    [ProducesResponseType(typeof(LoginOtpResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
+    public async Task<ActionResult<LoginOtpResponseDto>> LoginOtp([FromBody] LoginOtpRequestDto User)
     {
-        var email = requestRecover.email;
+        var loginOtpResponse = await _loginService.ValidateLoginByOtp(User);
 
-        if (email == null)
+        if (loginOtpResponse == null)
         {
-            return Unauthorized(new { Message = "Invalid email." });
+            return Unauthorized(ErrorResponseMappingHelper.Create(401, "Login", "Invalid username or password."));
         }
 
-        var User = _dbContext.User.FirstOrDefault(u => u.Email == email);
-
-        var RecoveryCodeGenerate = LoginService.GenerateRecoverPasswordCode();
-
-        if (User.PasswordRecovery == null)
+        if (string.IsNullOrEmpty(loginOtpResponse.token))
         {
-            var passwordRecoveryObj = new
-            {
-                Attempts = 3,
-                RecoveryCode = RecoveryCodeGenerate
-            };
-
-            string jsonPasswordRecoveryObj = JsonConvert.SerializeObject(passwordRecoveryObj);
-
-            User.PasswordRecovery = jsonPasswordRecoveryObj;
-
-            _dbContext.SaveChanges();
-        }
-        else
-        {
-            var UserRecovery = JsonConvert.DeserializeObject<RecoverPassword>(User.PasswordRecovery);
-
-            if (UserRecovery.Attempts <= 0)
-            {
-                return Unauthorized(new { Message = "User has already used all attempts" });
-            }
-
-            var passwordRecoveryObj = new
-            {
-                Attempts = UserRecovery?.Attempts,
-                RecoveryCode = RecoveryCodeGenerate
-            };
-
-            string jsonPasswordRecoveryObj = JsonConvert.SerializeObject(passwordRecoveryObj);
-
-            User.PasswordRecovery = jsonPasswordRecoveryObj;
-
-            _dbContext.SaveChanges();
+            return Unauthorized(ErrorResponseMappingHelper.Create(401, "Token", "Token cannot be empty."));
         }
 
-
-        var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(_loginService.GetEmailSenderName(), _loginService.GetEmailSender()));
-        message.To.Add(new MailboxAddress("", email));
-        message.Subject = "Recover Password Code";
-
-        message.Body = new TextPart("plain")
-        {
-            Text = RecoveryCodeGenerate
-        };
-
-        using var client = new SmtpClient();
-        client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-        client.Authenticate(_loginService.GetEmailSender(), _loginService.GetEmailSenderAppPassword());
-        client.Send(message);
-        client.Disconnect(true);
-
-        return Ok(new { Message = "Email sent successfully" });
+        return Ok(loginOtpResponse);
     }
 
-    [HttpPost("VerifyCode")]
-    public IActionResult VerifyRecoveryCode([FromBody] RequestRecover requestRecover)
+    [HttpPost("send-otp")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(SendOtpBadRequestDtoExample))]
+    public async Task<IActionResult> SendOtp([FromBody] SendOtpRequestDto request)
     {
-        //Façam uma service pra isso!
-        //Controller não lida com lógica!!! <3
-        if (requestRecover.code == null)
+        try
         {
-            return Unauthorized(new { Message = "Invalid code." });
+            string senderAddress = request.Email!;
+
+            await _loginService.SendOtp(senderAddress);
+            return Ok();
         }
-
-        var User = _dbContext.User.FirstOrDefault(u => u.Email == requestRecover.email);
-
-        var UserRecovery = JsonConvert.DeserializeObject<RecoverPassword>(User.PasswordRecovery);
-
-        if (UserRecovery.Code == requestRecover.code && UserRecovery.Attempts >= 0)
+        catch (Exception ex)
         {
-
-            User.Password = BCrypt.Net.BCrypt.HashPassword(requestRecover.password);
-
-            var passwordRecoveryObject = new
-            {
-                Attempts = 3,
-                RecoveryCode = 0
-            };
-
-            string jsonPasswordRecoveryObject = JsonConvert.SerializeObject(passwordRecoveryObject);
-
-            User.PasswordRecovery = jsonPasswordRecoveryObject;
-
-            _dbContext.SaveChanges();
-
-            return Ok(new { Message = "Password changed sucessfully" });
+            return StatusCode(500, $"Erro ao enviar e-mail: {ex.Message}");
         }
-        else if (UserRecovery?.Attempts <= 0)
-        {
-            return Unauthorized(new { Message = "User has already used all attempts" });
-        }
-
-        var passwordRecoveryObj = new
-        {
-            Attempts = (UserRecovery?.Attempts) - 1,
-            RecoveryCode = UserRecovery?.Code
-        };
-
-        string jsonPasswordRecoveryObj = JsonConvert.SerializeObject(passwordRecoveryObj);
-
-        User.PasswordRecovery = jsonPasswordRecoveryObj;
-
-        _dbContext.SaveChanges();
-
-        return Conflict(new { Message = $"Wrong code, you have {passwordRecoveryObj?.Attempts} attempts left" });
     }
-
 }
