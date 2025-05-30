@@ -1,4 +1,5 @@
-﻿using ManagementAPI.Models;
+﻿using ManagementAPI.Interfaces;
+using ManagementAPI.Models;
 using ManagementAPI.Repository;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -191,7 +192,7 @@ namespace ManagementAPI.Tests.RepositoryTests
         [Fact]
         public async Task UpdateUser_ShouldModifyUser_WhenUserExists_Mocked()
         {
-            var mockRepository = new Mock<DefaultUserRepository>(MockBehavior.Strict);
+            var mockRepository = new Mock<IDefaultUserRepository>(MockBehavior.Strict);
 
             var originalUser = new UserTable
             {
@@ -220,6 +221,5 @@ namespace ManagementAPI.Tests.RepositoryTests
 
             mockRepository.Verify(r => r.UpdateUser(It.IsAny<UserTable>()), Times.Once);
         }
-
     }
 }
