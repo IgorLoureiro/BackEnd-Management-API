@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using ManagementAPI.Enums;
+using ManagementAPI.Common.Enums;
 
 namespace ManagementAPI.DTO
 {

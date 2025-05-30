@@ -8,11 +8,16 @@ using Swashbuckle.AspNetCore.Filters;
 using ManagementAPI.Interfaces;
 using ManagementAPI.Interceptors;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-namespace ManagementAPI
+namespace ManagementAPI.Extensions
 {
     public static class ServiceExtensions
     {
+        private const string SecuritySchemeName = "Bearer";
+
         public static IServiceCollection AddCustomControllers(this IServiceCollection services)
         {
             services.AddControllers(options =>
@@ -46,7 +51,7 @@ namespace ManagementAPI
 
         public static IServiceCollection AddCustomDatabase(this IServiceCollection services)
         {
-            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? throw new Exception("DB_CONNECTION_STRING não configurada.");
 
             services.AddDbContext<DbContext>(options =>
             {
@@ -74,6 +79,7 @@ namespace ManagementAPI
 
         public static IServiceCollection AddSwagger(this IServiceCollection services)
         {
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
             {
@@ -81,8 +87,62 @@ namespace ManagementAPI
                 options.ExampleFilters();
             });
 
+            services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition(SecuritySchemeName, new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = string.Join(SecuritySchemeName, " {token}") 
+                });
+
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = SecuritySchemeName
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
             return services;
         }
+
+
+        public static IServiceCollection AddJwt(this IServiceCollection services)
+        {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER não configurado."),
+                    ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE não configurado."),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET") ??  throw new Exception("JWT_SECRET não configurado.")))
+                };
+            });
+
+            return services;
+        }
+
 
         public static IServiceCollection AddSwaggerExamples(this IServiceCollection services)
         {
