@@ -29,7 +29,7 @@ public class NotFoundFilter : IAsyncResultFilter
                     var msgValue = messageProperty.GetValue(notFoundResult.Value);
                     if (msgValue != null)
                     {
-                        customMessage = msgValue.ToString();
+                        customMessage = msgValue.ToString() ?? "";
                     }
                 }
             }
