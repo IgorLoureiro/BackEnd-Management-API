@@ -1,6 +1,7 @@
 ﻿using ManagementAPI.Models;
 using ManagementAPI.Repository;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using AppDbContext = ManagementAPI.Context.DbContext;
 
 namespace ManagementAPI.Tests.RepositoryTests
@@ -17,150 +18,208 @@ namespace ManagementAPI.Tests.RepositoryTests
         }
 
         [Fact]
-        public async Task CreateUserAsync_ShouldAddUser()
+        public async Task CreateUserAsync_ShouldAddUser_WhenUserIsValid()
         {
+            // Arrange
             var dbContext = CreateInMemoryDbContext();
             var repository = new DefaultUserRepository(dbContext);
 
+            var username = "UserTest";
+            var email = "usertest@email.com";
+            var password = "senha123";
+
             var user = new UserTable
             {
-                Username = "Franciely",
-                Email = "franciely@email.com",
-                Password = "senha123"
+                Username = username,
+                Email = email,
+                Password = password
             };
 
+            // Act
             var result = await repository.CreateUserAsync(user);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("Franciely", result.Username);
+            Assert.Equal(username, result.Username);
+            Assert.Equal(email, result.Email);
+            Assert.Equal(password, result.Password);
         }
 
         [Fact]
-        public async Task GetUserByEmailAsync_ShouldReturnCorrectUser()
+        public async Task GetUserByEmailAsync_ShouldReturnCorrectUser_WhenEmailExists()
         {
+            // Arrange
             var dbContext = CreateInMemoryDbContext();
             var repository = new DefaultUserRepository(dbContext);
 
+            var username = "TestUser";
+            var email = "testuser@email.com";
+            var password = "123";
+
             var user = new UserTable
             {
-                Username = "Teste",
-                Email = "teste@email.com",
-                Password = "123"
+                Username = username,
+                Email = email,
+                Password = password
             };
 
-            await repository.CreateUserAsync(user);
+            dbContext.Set<UserTable>().Add(user);
+            await dbContext.SaveChangesAsync();
 
-            var result = await repository.GetUserByEmailAsync("teste@email.com");
+            // Act
+            var result = await repository.GetUserByEmailAsync(email);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("Teste", result?.Username);
+            Assert.Equal(username, result?.Username);
         }
 
         [Fact]
-        public async Task DeleteUser_ShouldRemoveUser()
+        public async Task DeleteUser_ShouldRemoveUser_WhenUserExists()
         {
+            // Arrange
             var dbContext = CreateInMemoryDbContext();
             var repository = new DefaultUserRepository(dbContext);
 
+            var username = "Deletar";
+            var email = "del@email.com";
+            var password = "pass";
+
             var user = new UserTable
             {
-                Username = "Deletar",
-                Email = "del@email.com",
-                Password = "pass"
+                Username = username,
+                Email = email,
+                Password = password
             };
 
             var created = await repository.CreateUserAsync(user);
+
+            // Act
             var deleted = await repository.DeleteUser(created);
             var result = await repository.GetUserByIdAsync(created.Id);
 
+            // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task GetUserByIdAsync_ShouldReturnCorrectUser()
+        public async Task GetUserByIdAsync_ShouldReturnCorrectUser_WhenUserExists()
         {
+            // Arrange
             var dbContext = CreateInMemoryDbContext();
             var repository = new DefaultUserRepository(dbContext);
 
+            var username = "Joana";
+            var email = "joana@email.com";
+            var password = "senha";
+
             var user = new UserTable
             {
-                Username = "Joana",
-                Email = "joana@email.com",
-                Password = "senha"
+                Username = username,
+                Email = email,
+                Password = password
             };
 
             var created = await repository.CreateUserAsync(user);
 
+            // Act
             var result = await repository.GetUserByIdAsync(created.Id);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("Joana", result?.Username);
+            Assert.Equal(username, result?.Username);
         }
 
         [Fact]
-        public async Task GetUserByNameAsync_ShouldReturnCorrectUser()
+        public async Task GetUserByNameAsync_ShouldReturnCorrectUser_WhenUserExists()
         {
+            // Arrange
             var dbContext = CreateInMemoryDbContext();
             var repository = new DefaultUserRepository(dbContext);
 
+            var username = "Carlos";
+            var email = "carlos@email.com";
+            var password = "abc";
+
             var user = new UserTable
             {
-                Username = "Carlos",
-                Email = "carlos@email.com",
-                Password = "abc"
+                Username = username,
+                Email = email,
+                Password = password
             };
 
             await repository.CreateUserAsync(user);
 
-            var result = await repository.GetUserByNameAsync("Carlos");
+            // Act
+            var result = await repository.GetUserByNameAsync(username);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("Carlos", result?.Username);
+            Assert.Equal(username, result?.Username);
         }
 
         [Fact]
-        public async Task GetUserListAsync_ShouldReturnPaginatedUsers()
+        public async Task GetUserListAsync_ShouldReturnPaginatedUsers_WhenPageAndLimitProvided()
         {
+            // Arrange
             var dbContext = CreateInMemoryDbContext();
             var repository = new DefaultUserRepository(dbContext);
 
-            for (int i = 1; i <= 10; i++)
+            var users = Enumerable.Range(1, 10).Select(i => new UserTable
             {
-                await repository.CreateUserAsync(new UserTable
-                {
-                    Username = $"User{i}",
-                    Email = $"user{i}@email.com",
-                    Password = "123"
-                });
-            }
+                Username = $"User{i}",
+                Email = $"user{i}@email.com",
+                Password = "123"
+            });
 
-            var result = await repository.GetUserListAsync(limit: 5, page: 2);
+            dbContext.Set<UserTable>().AddRange(users);
+            await dbContext.SaveChangesAsync();
 
-            Assert.Equal(5, result.Count);
+            var page = 2;
+            var limit = 5;
+
+            // Act
+            var result = await repository.GetUserListAsync(limit: limit, page: page);
+
+            // Assert
+            Assert.Equal(limit, result.Count);
             Assert.Equal("User6", result[0].Username);
         }
 
-        [Fact]
-        public async Task UpdateUser_ShouldModifyUser()
-        {
-            var dbContext = CreateInMemoryDbContext();
-            var repository = new DefaultUserRepository(dbContext);
 
-            var user = new UserTable
+
+        [Fact]
+        public async Task UpdateUser_ShouldModifyUser_WhenUserExists_Mocked()
+        {
+            var mockRepository = new Mock<DefaultUserRepository>(MockBehavior.Strict);
+
+            var originalUser = new UserTable
             {
                 Username = "Maria",
                 Email = "maria@email.com",
                 Password = "pass"
             };
 
-            var created = await repository.CreateUserAsync(user);
+            var updatedUsername = "MariaUpdated";
 
-            created.Username = "MariaUpdated";
+            var updatedUser = new UserTable
+            {
+                Username = updatedUsername,
+                Email = originalUser.Email,
+                Password = originalUser.Password
+            };
 
-            var updated = await repository.UpdateUser(created);
+            mockRepository
+                .Setup(r => r.UpdateUser(It.Is<UserTable>(u => u.Username == originalUser.Username)))
+                .ReturnsAsync(updatedUser);
 
-            Assert.NotNull(updated);
-            Assert.Equal("MariaUpdated", updated?.Username);
+            var result = await mockRepository.Object.UpdateUser(originalUser);
+
+            Assert.NotNull(result);
+            Assert.Equal(updatedUsername, result.Username);
+
+            mockRepository.Verify(r => r.UpdateUser(It.IsAny<UserTable>()), Times.Once);
         }
+
     }
 }
