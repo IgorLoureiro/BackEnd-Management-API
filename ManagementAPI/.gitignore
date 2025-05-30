@@ -1,13 +1,6 @@
-<<<<<<< HEAD
-# Build
+# Build output
 **bin/
 **obj/
-=======
-## Build output
-bin/
-obj/
->>>>>>> 2cad827c56079cf253730a2999db817bbb52c4f2
-
 # Rider
 .idea/
 *.sln.iml
