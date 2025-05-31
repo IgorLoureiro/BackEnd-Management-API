@@ -33,6 +33,7 @@ namespace ManagementAPI.Controller
             return UserServiceErrorResultMapper.ToActionResult(result);
         }
 
+        [Authorize(Roles = $"{nameof(UserRole.admin)},{nameof(UserRole.user)}")]
         [HttpGet()]
         [ProducesResponseType(typeof(IEnumerable<UserResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
@@ -43,6 +44,7 @@ namespace ManagementAPI.Controller
             return Ok(result);
         }
 
+        [Authorize(Roles = $"{nameof(UserRole.admin)},{nameof(UserRole.user)}")]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(NotFoundErrorDto), StatusCodes.Status404NotFound)]

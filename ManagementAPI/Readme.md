@@ -26,6 +26,20 @@ dotnet clean
 dotnet restore
 dotnet build
 
+## Comandos de Test
+
+É necessário estar na raiz "ManagementAPI.Tests".
+
+dotnet test
+
+## Comandos para gerar relatório de cobertura de testes
+
+É necessário estar na raiz "ManagementAPI.Tests" e a ferramenta ReportGenerator.
+
+1. Instalar a ferramenta para gerar o relátorio de teste: dotnet tool install --global dotnet-reportgenerator-globaltool
+2. Executar os testes com cobertura: dotnet test ManagementAPI.Tests.csproj --collect:"XPlat Code Coverage"
+3. Gerar o relatório HTML: reportgenerator -reports:\*\*/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:Html
+
 ## 🎯 Objetivo
 
 Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para melhorar a **legibilidade**, **manutenção** e **eficiência** do código, sem alterar sua funcionalidade.
@@ -76,7 +90,6 @@ JWT_AUDIENCE=http://localhost:5215/
 JWT_SECRET=IZAqg5Mg2Jv0o09XJAoO1QbiQUHhFl9wlaWibYvePxVS7VZwazsaR4yBYTgA893K
 JWT_EXPIRE=30
 EMAIL_SENDER=teste@gmail.com
-EMAIL_SENDER_NAME=Sharp Guard
 EMAIL_SENDER_APP_PASSWORD=app pass key
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587

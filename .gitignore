@@ -6,3 +6,5 @@
 /.vs/ManagementAPI/FileContentIndex
 **/bin/
 **/obj/
+**/coverage-report/
+**/TestResults
