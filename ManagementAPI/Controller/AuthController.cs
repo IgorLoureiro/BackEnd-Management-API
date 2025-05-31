@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
     [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto User)
+    public async Task<ActionResult<LoginOtpResponseDto>> Login([FromBody] LoginRequestDto User)
     {
         var token = await _loginService.ValidateLoginAsync(User);
 

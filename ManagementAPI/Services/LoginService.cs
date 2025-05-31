@@ -87,7 +87,7 @@ public class LoginService : ILoginService
 
         var token = _jwtService.GenerateToken(claims);
 
-        return new LoginOtpResponseDto { token = token };
+        return new LoginOtpResponseDto { token = "Bearer " + token };
     }
 
     public async Task SendOtp(string recipientAddress)
