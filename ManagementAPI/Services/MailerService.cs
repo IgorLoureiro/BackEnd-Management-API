@@ -13,10 +13,19 @@ public class MailerService : IMailerService
 
     private readonly string senderEmailPassword;
 
+    private readonly string smtpServer;
+
+    private readonly string smtpPort;
+
+
+
     public MailerService()
     {
-        senderEmailAddress = Environment.GetEnvironmentVariable("EmailSender") ?? "";
-        senderEmailPassword = Environment.GetEnvironmentVariable("EmailSenderAppPassword") ?? "";
+        senderEmailAddress = Environment.GetEnvironmentVariable("EMAIL_SENDER") ?? "";
+        senderEmailPassword = Environment.GetEnvironmentVariable("EMAIL_SENDER_APP_PASSWORD") ?? "";
+        smtpServer = Environment.GetEnvironmentVariable("SMTP_SERVER") ?? "";
+        smtpPort = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "0";
+
     }
 
     public string GetSenderEmailAddress()
@@ -44,7 +53,7 @@ public class MailerService : IMailerService
         };
 
         using var client = new SmtpClient();
-        await client.ConnectAsync("sandbox.smtp.mailtrap.io", 587, SecureSocketOptions.StartTls); // sandbox.smtp.mailtrap.io
+        await client.ConnectAsync(smtpServer, int.Parse(smtpPort), SecureSocketOptions.StartTls); // sandbox.smtp.mailtrap.io
         await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
@@ -64,20 +73,18 @@ public class MailerService : IMailerService
             Text = recipientMessage
         };
 
-        using (var client = new SmtpClient())
+        using var client = new SmtpClient();
+        try
         {
-            try
-            {
-                await client.ConnectAsync("sandbox.smtp.mailtrap.io", 587, SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
-                Console.WriteLine("Email enviado com sucesso!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao enviar e-mail: {ex.Message}");
-            }
+            await client.ConnectAsync(smtpServer, int.Parse(smtpPort), SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+            Console.WriteLine("Email enviado com sucesso!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao enviar e-mail: {ex.Message}");
         }
 
     }
