@@ -15,8 +15,8 @@ public class MailerService : IMailerService
 
     public MailerService()
     {
-        senderEmailAddress = Environment.GetEnvironmentVariable("EmailSender") ?? "";
-        senderEmailPassword = Environment.GetEnvironmentVariable("EmailSenderAppPassword") ?? "";
+        senderEmailAddress = Environment.GetEnvironmentVariable("EMAIL_SENDER") ?? "";
+        senderEmailPassword = Environment.GetEnvironmentVariable("EMAIL_SENDER_APP_PASSWORD") ?? "";
     }
 
     public string GetSenderEmailAddress()
@@ -44,7 +44,7 @@ public class MailerService : IMailerService
         };
 
         using var client = new SmtpClient();
-        await client.ConnectAsync("sandbox.smtp.mailtrap.io", 587, SecureSocketOptions.StartTls); // sandbox.smtp.mailtrap.io
+        await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls); // sandbox.smtp.mailtrap.io
         await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
@@ -68,7 +68,7 @@ public class MailerService : IMailerService
         {
             try
             {
-                await client.ConnectAsync("sandbox.smtp.mailtrap.io", 587, SecureSocketOptions.StartTls);
+                await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
                 await client.AuthenticateAsync(senderEmailAddress, senderEmailPassword);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);

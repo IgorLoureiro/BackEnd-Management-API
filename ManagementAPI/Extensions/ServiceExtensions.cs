@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ManagementAPI.Helpers;
 
 namespace ManagementAPI.Extensions
 {
@@ -52,6 +53,9 @@ namespace ManagementAPI.Extensions
         public static IServiceCollection AddCustomDatabase(this IServiceCollection services)
         {
             var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? throw new Exception("DB_CONNECTION_STRING não configurada.");
+
+            var dbInitializer = new DatabaseInitializer();
+            dbInitializer.EnsureDatabaseExists(connectionString);
 
             services.AddDbContext<DbContext>(options =>
             {
