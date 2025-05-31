@@ -223,6 +223,5 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ServicesTests
             _repositoryMock.Verify(r => r.GetUserByIdAsync(userId), Times.Once);
             _repositoryMock.Verify(r => r.DeleteUser(It.IsAny<UserTable>()), Times.Never);
         }
-
     }
 }
