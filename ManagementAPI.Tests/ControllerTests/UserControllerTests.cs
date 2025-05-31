@@ -1,10 +1,12 @@
 ﻿using ManagementAPI.Controller;
-using ManagementAPI.Interfaces;
 using ManagementAPI.DTO;
-using Microsoft.AspNetCore.Mvc;
 using ManagementAPI.Enums;
-using System.Collections.Generic;
+using ManagementAPI.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
 {
@@ -174,6 +176,40 @@ namespace ManagementAPI.Tests.ManagementAPI.Tests.ControllerTests
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Contains("Not Found", notFoundResult.Value.ToString());
+        }
+
+        [Fact]
+        public async Task GetUsersList_WhenCalledByAuthorizedUser_ShouldReturnOkWithUserList()
+        {
+            // Arrange
+            var users = new List<UserResponseDto>
+            {
+                new UserResponseDto { Id = 1, Username = "user1", Email = "user1@email.com", Role = "admin" }
+            };
+
+            _mockUserService
+                .Setup(s => s.GetListUserAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(users);
+
+            //generates an Admin type of user
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, "testuser"),
+                new Claim(ClaimTypes.Role, "admin")
+            }, "mock"));
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+
+            // Act
+            var result = await _controller.GetUsersList();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedUsers = Assert.IsAssignableFrom<IEnumerable<UserResponseDto>>(okResult.Value);
+            Assert.Single(returnedUsers);
         }
     }
 }
