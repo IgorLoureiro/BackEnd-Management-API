@@ -103,24 +103,6 @@ namespace ManagementAPI.Services
             return defaultUser;
         }
 
-        private bool ValidateDefaultUser(CreateUserRequestDto defaultUser, bool validateWithPassword = false)
-        {
-            if (validateWithPassword)
-            {
-                if (defaultUser == null) return false;
-                if (defaultUser.Username == null) return false;
-                if (defaultUser.Email == null) return false;
-                if (defaultUser.Password == null) return false;
-                return true;
-            }
-
-            if (defaultUser == null) return false;
-            if (defaultUser.Username == null) return false;
-            if (defaultUser.Email == null) return false;
-
-            return true;
-        }
-
         private UserTable MapFieldsToChange(UserTable userTable, UpdateUserRequestDto defaultUser)
         {
             if (!string.IsNullOrWhiteSpace(defaultUser.Username) &&
