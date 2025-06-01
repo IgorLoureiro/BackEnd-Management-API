@@ -4,6 +4,9 @@ using ManagementAPI.Helpers;
 using ManagementAPI.Interfaces;
 using ManagementAPI.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
+using ManagementAPI.Types;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ManagementAPI.Controller;
 
@@ -19,6 +22,28 @@ public class AuthController : ControllerBase
         _loginService = loginService;
     }
 
+    [HttpGet("signed")]
+    [Authorize]
+    [ProducesResponseType(typeof(UserSignedDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UnauthorizedResponseDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(InternalServerErrorDto), StatusCodes.Status500InternalServerError)]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(UserSignedResponseDtoExample))]
+    [SwaggerResponseExample(StatusCodes.Status401Unauthorized, typeof(UserSignedUnauthorizedResponseDtoExample))]
+    public ActionResult<UserSignedDto> GetSignedUser()
+    {
+        var identity = HttpContext.User.Identity as ClaimsIdentity;
+
+        if (identity == null || !identity.IsAuthenticated)
+            return Unauthorized();
+
+        var userData = _loginService.GetSignedUser(identity);
+
+        if (userData == null)
+            return Unauthorized();
+
+        return Ok(userData);
+    }
+
     [HttpPost("Login")]
     [ProducesResponseType(typeof(LoginOtpResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponseDto), StatusCodes.Status400BadRequest)]
@@ -26,11 +51,18 @@ public class AuthController : ControllerBase
     [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
     public async Task<ActionResult<LoginOtpResponseDto>> Login([FromBody] LoginRequestDto User)
     {
-        var token = await _loginService.ValidateLoginAsync(User);
+        try
+        {
+            var token = await _loginService.ValidateLoginAsync(User);
 
-        if (token == null) return Unauthorized(new { Message = "Invalid username or password." });
+            if (token == null) return Unauthorized(new { Message = "Invalid username or password." });
 
-        return Ok(new { token });
+            return Ok(new { token });
+        }
+        catch (HttpResponseException ex)
+        {
+            return StatusCode(ex.StatusCode, ex.ErrorObject);
+        }
     }
 
     [HttpPost("login-otp")]
@@ -40,19 +72,26 @@ public class AuthController : ControllerBase
     [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(LoginBadRequestDtoExample))]
     public async Task<ActionResult<LoginOtpResponseDto>> LoginOtp([FromBody] LoginOtpRequestDto User)
     {
-        var loginOtpResponse = await _loginService.ValidateLoginByOtp(User);
-
-        if (loginOtpResponse == null)
+        try
         {
-            return Unauthorized(ErrorResponseMappingHelper.Create(401, "Login", "Invalid username or password."));
-        }
+            var loginOtpResponse = await _loginService.ValidateLoginByOtp(User);
 
-        if (string.IsNullOrEmpty(loginOtpResponse.token))
+            if (loginOtpResponse == null)
+            {
+                return Unauthorized(ErrorResponseMappingHelper.Create(401, "Login", "Invalid username or password."));
+            }
+
+            if (string.IsNullOrEmpty(loginOtpResponse.token))
+            {
+                return Unauthorized(ErrorResponseMappingHelper.Create(401, "Token", "Token cannot be empty."));
+            }
+
+            return Ok(loginOtpResponse);
+        }
+        catch (HttpResponseException ex)
         {
-            return Unauthorized(ErrorResponseMappingHelper.Create(401, "Token", "Token cannot be empty."));
+            return StatusCode(ex.StatusCode, ex.ErrorObject);
         }
-
-        return Ok(loginOtpResponse);
     }
 
     [HttpPost("send-otp")]
@@ -64,14 +103,12 @@ public class AuthController : ControllerBase
     {
         try
         {
-            string senderAddress = request.Email!;
-
-            await _loginService.SendOtp(senderAddress);
+            await _loginService.SendOtp(request.Email!);
             return Ok();
         }
-        catch (Exception ex)
+        catch (HttpResponseException ex)
         {
-            return StatusCode(500, $"Erro ao enviar e-mail: {ex.Message}");
+            return StatusCode(ex.StatusCode, ex.ErrorObject);
         }
     }
 }

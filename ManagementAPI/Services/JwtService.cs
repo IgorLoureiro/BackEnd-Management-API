@@ -26,8 +26,21 @@ public class JwtService : IJwtService
             signingCredentials: creds
         );
 
-        var bearerToken = new JwtSecurityTokenHandler().WriteToken(token);
+        var bearerToken = "Bearer " + new JwtSecurityTokenHandler().WriteToken(token);
         return bearerToken;
+    }
+
+    public IEnumerable<Claim> GenerateClaims(string sub, string email, string username, string role)
+    {
+        var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, sub),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(JwtRegisteredClaimNames.Name, username),
+                new Claim(ClaimTypes.Role, role),
+            };
+
+        return claims;
     }
 }
 
