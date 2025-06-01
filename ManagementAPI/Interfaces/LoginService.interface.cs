@@ -1,9 +1,12 @@
 using ManagementAPI.DTO;
+using System.Security.Claims;
 
 namespace ManagementAPI.Interfaces
 {
     public interface ILoginService
     {
+        UserSignedDto? GetSignedUser(ClaimsIdentity identity);
+
         Task<string?> ValidateLoginAsync(LoginRequestDto User);
 
         Task<LoginOtpResponseDto?> ValidateLoginByOtp(LoginOtpRequestDto User);

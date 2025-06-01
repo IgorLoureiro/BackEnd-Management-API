@@ -98,7 +98,7 @@ namespace ManagementAPI.Extensions
                     Name = "Authorization",
                     Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = string.Join(SecuritySchemeName, " {token}") 
+                    Description = string.Join(SecuritySchemeName, " {token}")
                 });
 
                 c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -120,7 +120,6 @@ namespace ManagementAPI.Extensions
             return services;
         }
 
-
         public static IServiceCollection AddJwt(this IServiceCollection services)
         {
             services.AddAuthentication(options =>
@@ -130,6 +129,7 @@ namespace ManagementAPI.Extensions
             })
             .AddJwtBearer(options =>
             {
+                options.MapInboundClaims = false;
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -140,7 +140,7 @@ namespace ManagementAPI.Extensions
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER não configurado."),
                     ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE não configurado."),
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET") ??  throw new Exception("JWT_SECRET não configurado.")))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new Exception("JWT_SECRET não configurado.")))
                 };
             });
 

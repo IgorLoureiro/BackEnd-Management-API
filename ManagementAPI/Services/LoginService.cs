@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using ManagementAPI.DTO;
 using ManagementAPI.Interfaces;
 using ManagementAPI.Helpers;
+using ManagementAPI.Types;
 
 namespace ManagementAPI.Services;
 
@@ -40,62 +41,78 @@ public class LoginService : ILoginService
         return _emailSenderAppPassword;
     }
 
+    public UserSignedDto? GetSignedUser(ClaimsIdentity identity)
+    {
+        if (!identity.IsAuthenticated)
+            return null;
+
+        var claims = identity.Claims;
+
+        return new UserSignedDto
+        {
+            Id = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value,
+            Email = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value,
+            Username = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name)?.Value,
+            Role = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
+        };
+    }
+
     public async Task<string?> ValidateLoginAsync(LoginRequestDto User)
     {
         var loginUser = await _userRepository.GetUserByEmailAsync(User.Email);
-        if (loginUser == null) return null;
+        if (loginUser == null)
+        {
+            throw new HttpResponseException(401, ErrorResponseMappingHelper.Create(401, "password", "email or password may wrong"));
+        }
 
         /* validate password */
         var isValidPassword = PasswordEncryptionHelper.VerifyPassword(User.Password, loginUser.Password);
-        if (!isValidPassword) return null;
+        if (!isValidPassword)
+        {
+            throw new HttpResponseException(401, ErrorResponseMappingHelper.Create(401, "password", "email or password may wrong"));
+        }
 
         /* Generate JWT Token */
-        var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, loginUser.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, loginUser.Email),
-                new Claim(JwtRegisteredClaimNames.Name, loginUser.Username),
-                new Claim(ClaimTypes.Role, loginUser.Role),
-            };
-
-        /* return token */
+        var claims = _jwtService.GenerateClaims(loginUser.Id.ToString(), loginUser.Email, loginUser.Username, loginUser.Role);
         var token = _jwtService.GenerateToken(claims);
-        return "Bearer " + token;
+
+        return token;
     }
 
     public async Task<LoginOtpResponseDto?> ValidateLoginByOtp(LoginOtpRequestDto User)
     {
         /* Find existing user */
         var loginUser = await _userRepository.GetUserByEmailAsync(User.Email);
-        if (loginUser == null) return null;
+        if (loginUser == null)
+        {
+            throw new HttpResponseException(401, ErrorResponseMappingHelper.Create(401, "password", "email or password may wrong"));
+        }
 
         /* Validate OTP Expiration */
         if (loginUser.OtpCode == null || !loginUser.OtpExpiration.HasValue || loginUser.OtpExpiration.Value < DateTime.UtcNow) return null;
 
         /* Validate Otp code */
         var isValidPassword = PasswordEncryptionHelper.VerifyPassword(User.Password, loginUser.OtpCode);
-        if (!isValidPassword) return null;
+        if (!isValidPassword)
+        {
+            throw new HttpResponseException(401, ErrorResponseMappingHelper.Create(401, "password", "email or password may wrong"));
+        }
 
         /* Generate JWT Token */
-        var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, loginUser.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, loginUser.Email),
-                new Claim(JwtRegisteredClaimNames.Name, loginUser.Username),
-                new Claim(ClaimTypes.Role, loginUser.Role),
-            };
-
+        var claims = _jwtService.GenerateClaims(loginUser.Id.ToString(), loginUser.Email, loginUser.Username, loginUser.Role);
         var token = _jwtService.GenerateToken(claims);
 
-        return new LoginOtpResponseDto { token = "Bearer " + token };
+        return new LoginOtpResponseDto { token = token };
     }
 
     public async Task SendOtp(string recipientAddress)
     {
         /* Find existing user */
         var loginUser = await _userRepository.GetUserByEmailAsync(recipientAddress);
-
-        if (loginUser == null) return;
+        if (loginUser == null)
+        {
+            throw new HttpResponseException(401, ErrorResponseMappingHelper.Create(401, "email", "email not found."));
+        }
 
         /* Generate OTP code */
         int rangeOtp = 4;
@@ -103,17 +120,12 @@ public class LoginService : ILoginService
 
         /* update user password to use otp code */
         loginUser.OtpCode = BCrypt.Net.BCrypt.HashPassword(otpCode);
-        loginUser.OtpExpiration = DateTime.UtcNow.AddMinutes(5); // expira em 5 minutos
+        loginUser.OtpExpiration = DateTime.UtcNow.AddMinutes(5);
 
         await _userRepository.UpdateUser(loginUser);
 
-        /* Generate Template */
-        string recipientName = recipientAddress;
-        string recipientSubject = "Código de Acesso - Sharp Guard";
-        string recipientMessage = $"Seu código de acesso é: {otpCode}";
-
         /* Send template via email */
-        await _mailerService.SenderMail(recipientName, recipientAddress, recipientSubject, recipientMessage);
+        await _mailerService.SendOtpEmail(recipientAddress, otpCode);
     }
 
     public string GenerateOtpCode(int length = 4)
