@@ -20,6 +20,13 @@ abrimos outro terminal e rodamos a api:
 dotnet run
 ```
 
+### Rodando o Projeto com Docker-Compose:
+
+1. Crie o arquivo .env seguindo o modelo contido em .env.example
+2. Execute o comando para Buildar os containers: docker-compose up --build
+3. Execute o comando para fazer uma limpeza: docker-compose down -v && docker system prune -a --volumes
+4. Será necessário ter permissão de usuário para o docker executar o script com chmod
+
 ## Comandos de Build
 
 dotnet clean
@@ -98,7 +105,7 @@ SMTP_PORT=587
 Script SQL:
 
 ```
-CREATE TABLE `user` (
+CREATE TABLE IF NOT EXISTS `user` (
    `id` INT AUTO_INCREMENT NOT NULL,
    `username` VARCHAR(255) NOT NULL,
    `password` VARCHAR(255) NOT NULL,
