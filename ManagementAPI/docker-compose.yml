@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  managementapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DB_CONNECTION_STRING: "${DB_CONNECTION_STRING}"
+      JWT_ISSUER: "${JWT_ISSUER}"
+      JWT_AUDIENCE: "${JWT_AUDIENCE}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRE: "${JWT_EXPIRE}"
+      EMAIL_SENDER: "${EMAIL_SENDER}"
+      EMAIL_SENDER_APP_PASSWORD: "${EMAIL_SENDER_APP_PASSWORD}"
+      SMTP_SERVER: "${SMTP_SERVER}"
+      SMTP_PORT: "${SMTP_PORT}"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+
+volumes:
+  dbdata:
