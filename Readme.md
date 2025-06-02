@@ -59,6 +59,7 @@ docker compose up -d
 
 Através do link: https://localhost:7039/swagger/index.html
 
+
 ---
 
 ## 🧪 Executando os testes localmente
@@ -130,6 +131,7 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** e boa
 - 📦 Repositório público no **GitHub** com código e testes
 
 ## [🎬 Vídeo de apresentação](https://youtu.be/9n-m1_wjD9Y)
+
 
 ## 📑 Licença
 
