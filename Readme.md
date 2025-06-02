@@ -43,7 +43,7 @@ SMTP_PORT=587
 
 ---
 
-### 🐳 Subindo o container Docker do projeto junto com MySQL 
+### 🐳 Subindo o container Docker do projeto junto com MySQL
 
 Dentro da pasta do projeto:
 
@@ -51,8 +51,13 @@ Dentro da pasta do projeto:
 docker compose up -d
 ```
 
-> 📌 *Caso prefira usar um MySQL local, ajuste a string de conexão no arquivo `.env`.*
+> 📌 _Caso prefira usar um MySQL local, ajuste a string de conexão no arquivo `.env`._
 
+---
+
+## 📜 Acesso ao Swagger
+
+Através do link: https://localhost:7039/swagger/index.html
 
 ---
 
@@ -65,8 +70,7 @@ cd ManagementAPI.Tests
 dotnet test
 ```
 
-(também é possível testar a través da UI do Visual Studio)
----
+## (também é possível testar a través da UI do Visual Studio)
 
 ## 📊 Gerando Relatório de Cobertura de Testes
 
@@ -125,10 +129,7 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** e boa
   - Conclusão sobre a importância de **Clean Code**
 - 📦 Repositório público no **GitHub** com código e testes
 
-[📎 Link para o arquivo de entrega](https://docs.google.com/document/d/12hYDcAg29dHkn7aEFC8bcyYv-Xd_OSCnnwZ3GkMcCf8/edit?usp=sharing)
-
----
-
+## [🎬 Vídeo de apresentação](https://youtu.be/9n-m1_wjD9Y)
 
 ## 📑 Licença
 
