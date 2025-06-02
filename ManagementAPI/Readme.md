@@ -54,6 +54,7 @@ docker compose up -d
 > 📌 *Caso prefira usar um MySQL local, ajuste a string de conexão no arquivo `.env`.*
 
 
+
 ---
 
 ## 🧪 Executando os testes localmente
@@ -128,6 +129,7 @@ Refatorar um código-fonte legado, aplicando princípios de **Clean Code** e boa
 [📎 Link para o arquivo de entrega](https://docs.google.com/document/d/12hYDcAg29dHkn7aEFC8bcyYv-Xd_OSCnnwZ3GkMcCf8/edit?usp=sharing)
 
 ---
+
 
 
 ## 📑 Licença
