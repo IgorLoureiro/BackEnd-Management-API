@@ -1,113 +1,135 @@
-﻿# Trabalho Acadêmico
+﻿# 📊 Sharp Guard
 
-## Rodando o Projeto Localmente
+API desenvolvida em **.NET** para gerenciamento de usuários, com autenticação JWT, envio de e-mail e cobertura de testes.
 
-Para rodar o código localmente é necessário um banco Mysql (no nosso caso optamos por usar um container docker)
+---
 
-Dentro da pasta do projeto rodamos os seguintes comandos
+## 📦 Rodando o Projeto Localmente
+
+### ✅ Pré-requisitos
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download)
+- [Docker](https://www.docker.com/) (opcional)
+- [MySQL Server (caso não use Docker)](https://dev.mysql.com/downloads/installer/)
+
+---
+
+### 📥 Clone o projeto
 
 ```bash
-docker compose up
+git clone https://github.com/seu-usuario/ManagementAPI.git
+cd ManagementAPI
 ```
 
-(caso não queira usar o docker basta usar um mysql e alterar a url de conexão do arquivo .env)
+---
 
-Copie o .env example e crie um .env colocando os valores reais das variaveis
+### ⚙️ Configuração do Ambiente
 
-abrimos outro terminal e rodamos a api:
+1. Copie o `.env`:
+
+```env
+DB_CONNECTION_STRING=server=db;database=management_cs_api;user=root;password=123456;
+JWT_ISSUER=http://localhost:5215/
+JWT_AUDIENCE=http://localhost:5215/
+JWT_SECRET=enfonefoJONQOFNeoDJKfEIONFIOCeju
+JWT_EXPIRE=30
+EMAIL_SENDER=teste@gmail.com
+EMAIL_SENDER_APP_PASSWORD=app-pass-key
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+```
+
+2. Atualize as variáveis no `.env` com seus valores reais.
+
+---
+
+### 🐳 Subindo o container Docker do projeto junto com MySQL 
+
+Dentro da pasta do projeto:
 
 ```bash
-dotnet run
+docker compose up -d
 ```
 
-## Comandos de Build
+> 📌 *Caso prefira usar um MySQL local, ajuste a string de conexão no arquivo `.env`.*
 
-dotnet clean
-dotnet restore
-dotnet build
 
-## Comandos de Test
+---
 
-É necessário estar na raiz "ManagementAPI.Tests".
+## 🧪 Executando os testes localmente
 
+Navegue até a pasta de testes:
+
+```bash
+cd ManagementAPI.Tests
 dotnet test
+```
 
-## Comandos para gerar relatório de cobertura de testes
+(também é possível testar a través da UI do Visual Studio)
+---
 
-É necessário estar na raiz "ManagementAPI.Tests" e a ferramenta ReportGenerator.
+## 📊 Gerando Relatório de Cobertura de Testes
 
-1. Instalar a ferramenta para gerar o relátorio de teste: dotnet tool install --global dotnet-reportgenerator-globaltool
-2. Executar os testes com cobertura: dotnet test ManagementAPI.Tests.csproj --collect:"XPlat Code Coverage"
-3. Gerar o relatório HTML: reportgenerator -reports:\*\*/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:Html
+1. Instale o ReportGenerator (caso ainda não tenha):
 
-## 🎯 Objetivo
+```bash
+dotnet tool install --global dotnet-reportgenerator-globaltool
+```
 
-Refatorar um código-fonte legado, aplicando princípios de **Clean Code** para melhorar a **legibilidade**, **manutenção** e **eficiência** do código, sem alterar sua funcionalidade.
+2. Execute os testes com cobertura:
+
+```bash
+dotnet test ManagementAPI.Tests.csproj --collect:"XPlat Code Coverage"
+```
+
+3. Gere o relatório HTML:
+
+```bash
+reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:Html
+```
 
 ---
 
-## 📌 Atividades
+## 🎯 Objetivo do Projeto
 
-- Identificar problemas e refatorar utilizando boas práticas de **Clean Code**
-- Aplicar pelo menos um **Design Pattern**
-- Implementar **testes unitários**
-- Utilizar **controle de versão no GitHub** com atualizações registradas nos meses de abril e maio
+Refatorar um código-fonte legado, aplicando princípios de **Clean Code** e boas práticas de engenharia de software, sem alterar sua funcionalidade.
 
 ---
 
-## 📝 Critérios de Avaliação
+## 📌 Atividades Realizadas
 
-- **Legibilidade:** Nomes claros e código organizado
-- **Estrutura:** Modularização e redução de repetições
-- **Documentação:** Comentários apenas quando necessário
-- **Boas práticas:** Aplicação de princípios **SOLID**, **DRY**, **KISS** e **YAGNI**
-- **Testes unitários** implementados e validados
-- **Versionamento público** via **GitHub**
+- Refatoração com foco em **legibilidade** e **manutenção**
+- Aplicação de pelo menos um **Design Pattern**
+- Implementação de **testes unitários**
+- Controle de versão público via **GitHub**
+
+---
+
+## ✅ Critérios Atendidos
+
+- 📚 Nomes de variáveis e métodos claros
+- 📦 Estrutura modular e coesa
+- 📑 Comentários apenas quando necessário
+- 🧭 Aplicação de princípios **SOLID**, **DRY**, **KISS** e **YAGNI**
+- 🔍 Cobertura de testes com relatório visual
+- 📌 Histórico de commits organizado entre abril e maio
 
 ---
 
 ## 📅 Entregas
 
-### 📌 1 de junho de 2025
-
-- 📄 PDF no **Ulife** contendo:
-  - Código original com deficiências identificadas
-  - Código refatorado com justificativas das mudanças
+- 📄 PDF enviado via **Ulife**, contendo:
+  - Código original e deficiências
+  - Código refatorado com justificativas
   - Testes unitários implementados
-  - Conclusão sobre a importância do **Clean Code**
-- 📦 Repositório público no **GitHub** com código e testes (link incluso no PDF)
+  - Conclusão sobre a importância de **Clean Code**
+- 📦 Repositório público no **GitHub** com código e testes
+
+[📎 Link para o arquivo de entrega](https://docs.google.com/document/d/12hYDcAg29dHkn7aEFC8bcyYv-Xd_OSCnnwZ3GkMcCf8/edit?usp=sharing)
 
 ---
 
-[ARQUIVO PARA ENTREGA](https://docs.google.com/document/d/12hYDcAg29dHkn7aEFC8bcyYv-Xd_OSCnnwZ3GkMcCf8/edit?usp=sharing)
 
-Exemplo de .env:
+## 📑 Licença
 
-```
-DB_CONNECTION_STRING=server=localhost;database=management_cs_api;user=root;password=2004;
-JWT_ISSUER=http://localhost:5215/
-JWT_AUDIENCE=http://localhost:5215/
-JWT_SECRET=IZAqg5Mg2Jv0o09XJAoO1QbiQUHhFl9wlaWibYvePxVS7VZwazsaR4yBYTgA893K
-JWT_EXPIRE=30
-EMAIL_SENDER=teste@gmail.com
-EMAIL_SENDER_APP_PASSWORD=app pass key
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-```
-
-Script SQL:
-
-```
-CREATE TABLE `user` (
-   `id` INT AUTO_INCREMENT NOT NULL,
-   `username` VARCHAR(255) NOT NULL,
-   `password` VARCHAR(255) NOT NULL,
-   `email` VARCHAR(255) NOT NULL,
-   `role` ENUM("admin", "user") NOT NULL default "user",
-   `passwordRecovery` VARCHAR(255) NULL,
-   `otpCode` VARCHAR(255) NULL,
-   `otpExpiration` DATETIME NULL,
-
-   PRIMARY KEY(`id`)
-);
-```
+Este projeto é acadêmico e sem fins comerciais.
